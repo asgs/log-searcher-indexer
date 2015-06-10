@@ -3,12 +3,20 @@
  */
 package net.tworks.logapps.admin.database;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.stereotype.Component;
 
 import net.tworks.logapps.common.database.DBTableManager;
 import net.tworks.logapps.common.database.DataSourceManager;
+import net.tworks.logapps.common.database.exception.DatabaseConfigurationException;
 import net.tworks.logapps.common.model.SourceTypeConfiguration;
 
 /**
@@ -21,9 +29,18 @@ import net.tworks.logapps.common.model.SourceTypeConfiguration;
 @Component
 public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
 	private DBTableManager dbTableManager;
-	
-	private String sqlForSourceIndexMapping = "insert into index_mapping (search_index, source_type) values (?, ?)"; 
+
+	private final String sqlForIndexMapping = "insert into index_mapping (search_index, source_type) values (?, ?)";
+
+	private final String sqlForSourceMapping = "insert into source_mapping (source_type, source) values (?, ?)";
+
+	private final String sqlForSourceMetadata = "insert into source_metadata (source_type, file_path) values (?, ?)";
+
+	private StringBuilder sqlForAlterTableStructuredEvent = new StringBuilder(
+			"alter table structured_event");
 
 	/**
 	 * Configures the new source type in the database.
@@ -32,24 +49,133 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 	 * @return whether the operation was successful or not.
 	 */
 	public boolean configureNewSourceType(
-			SourceTypeConfiguration sourceTypeConfiguration) {
+			SourceTypeConfiguration sourceTypeConfiguration)
+			throws DatabaseConfigurationException {
+
+		JdbcTemplate jdbcTemplate = DataSourceManager.getInstance()
+				.getJdbcTemplate();
 
 		// Check if source index is present. if present, need to add a row in
 		// the index_mapping table for this source_type.
-		//dbTableManager.insertRow("insert new source_index and source_type");
-		
-		JdbcTemplate jdbcTemplate = DataSourceManager.getInstance().getJdbcTemplate();
-		
-		/*jdbcTemplate.execute(sqlForSourceIndexMapping, new PreparedStatementCallback<T>() {
-		})*/
+		// dbTableManager.insertRow("insert new source_index and source_type");
+		if (sourceTypeConfiguration.getSourceIndex() != null) {
+			if (!configureIndexMapping(jdbcTemplate, sourceTypeConfiguration)) {
+				throw new DatabaseConfigurationException(
+						"Failed to configure the index_mapping table.");
+			}
+		}
 
 		// add a new row to the source_mapping table to map the source_type and
 		// source it's coming from.
+		if (!configureSourceMapping(jdbcTemplate, sourceTypeConfiguration)) {
+			throw new DatabaseConfigurationException(
+					"Failed to configure the source_mapping table.");
+		}
 
 		// add a new row to the source_metadata table to infuse information
 		// related to this source_type.
+		if (!configureSourceMetadata(jdbcTemplate, sourceTypeConfiguration)) {
+			throw new DatabaseConfigurationException(
+					"Failed to configure the source_metadata table.");
+		}
+
+		// If there are tokens discovered in the log file pattern layout, alter
+		// the table structured_event to dynamically add corresponding columns.
+
+		List<String> tokens = sourceTypeConfiguration.getTokens();
+		for (String token : tokens) {
+			sqlForAlterTableStructuredEvent.append(" add ");
+			sqlForAlterTableStructuredEvent.append(token);
+			sqlForAlterTableStructuredEvent.append(" varchar2(100)");
+		}
+
+		jdbcTemplate.execute(sqlForAlterTableStructuredEvent.toString());
 
 		return true;
+	}
+
+	private boolean configureIndexMapping(JdbcTemplate jdbcTemplate,
+			final SourceTypeConfiguration sourceTypeConfiguration) {
+
+		return jdbcTemplate.execute(sqlForIndexMapping,
+				new PreparedStatementCallback<Boolean>() {
+
+					@Override
+					public Boolean doInPreparedStatement(
+							PreparedStatement preparedStatement)
+							throws SQLException, DataAccessException {
+						try {
+							preparedStatement.setString(1,
+									sourceTypeConfiguration.getSourceIndex());
+							preparedStatement.setString(2,
+									sourceTypeConfiguration.getSourceType());
+							preparedStatement.execute();
+							logger.info("Configured index_mapping table.");
+						} catch (SQLException sqlException) {
+							logger.error(
+									"Exception configuring index_mapping table. Cause;",
+									sqlException);
+							return false;
+						}
+						return true;
+					}
+				});
+	}
+
+	private boolean configureSourceMapping(JdbcTemplate jdbcTemplate,
+			final SourceTypeConfiguration sourceTypeConfiguration) {
+
+		return jdbcTemplate.execute(sqlForSourceMapping,
+				new PreparedStatementCallback<Boolean>() {
+
+					@Override
+					public Boolean doInPreparedStatement(
+							PreparedStatement preparedStatement)
+							throws SQLException, DataAccessException {
+						try {
+							preparedStatement.setString(1,
+									sourceTypeConfiguration.getSourceType());
+							preparedStatement.setString(2,
+									sourceTypeConfiguration.getLogLocation());
+							preparedStatement.execute();
+							logger.info("Configured source_mapping table.");
+						} catch (SQLException sqlException) {
+							logger.error(
+									"Exception configuring source_mapping table. Cause;",
+									sqlException);
+							return false;
+						}
+						return true;
+					}
+				});
+	}
+
+	private boolean configureSourceMetadata(JdbcTemplate jdbcTemplate,
+			final SourceTypeConfiguration sourceTypeConfiguration) {
+
+		return jdbcTemplate.execute(sqlForSourceMetadata,
+				new PreparedStatementCallback<Boolean>() {
+
+					@Override
+					public Boolean doInPreparedStatement(
+							PreparedStatement preparedStatement)
+							throws SQLException, DataAccessException {
+						try {
+							preparedStatement.setString(1,
+									sourceTypeConfiguration.getSourceType());
+							preparedStatement.setString(2,
+									sourceTypeConfiguration.getLogLocation());
+							preparedStatement.execute();
+							logger.info("Configured source_metadata table.");
+						} catch (SQLException sqlException) {
+							logger.error(
+									"Exception configuring source_metadata table. Cause;",
+									sqlException);
+							return false;
+						}
+						return true;
+					}
+				});
 	}
 
 }

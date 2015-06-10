@@ -7,7 +7,9 @@ import java.util.List;
 
 import net.tworks.logapps.admin.database.ConfigureSourceTypeDAO;
 import net.tworks.logapps.admin.parser.LogPatternLayoutParser;
+import net.tworks.logapps.common.database.exception.DatabaseConfigurationException;
 import net.tworks.logapps.common.model.SourceTypeConfiguration;
+import net.tworks.logapps.rest.model.ConfigurationResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,8 +53,19 @@ public class AdminService {
 		List<String> tokens = logPatternLayoutParser.generateTokenNames();
 
 		sourceTypeConfiguration.setTokens(tokens);
-
-		configureSourceTypeDAO.configureNewSourceType(sourceTypeConfiguration);
+		ConfigurationResult configurationResult = new ConfigurationResult();
+		try {
+			configureSourceTypeDAO
+					.configureNewSourceType(sourceTypeConfiguration);
+			configurationResult.setResult(true);
+			configurationResult
+					.setMessage("Successfully configured for indexing.");
+		} catch (DatabaseConfigurationException databaseConfigurationException) {
+			configurationResult.setResult(false);
+			configurationResult
+					.setMessage("Failed to configured for indexing. Reason is "
+							+ databaseConfigurationException.getMessage());
+		}
 
 	}
 }

@@ -3,6 +3,7 @@
  */
 package net.tworks.logapps.admin.database;
 
+import net.tworks.logapps.common.database.exception.DatabaseConfigurationException;
 import net.tworks.logapps.common.model.SourceTypeConfiguration;
 
 /**
@@ -22,6 +23,7 @@ public interface ConfigureSourceTypeDAO {
 	 * @return whether the operation was successful or not.
 	 */
 	boolean configureNewSourceType(
-			SourceTypeConfiguration sourceTypeConfiguration);
+			SourceTypeConfiguration sourceTypeConfiguration)
+			throws DatabaseConfigurationException;
 
 }
