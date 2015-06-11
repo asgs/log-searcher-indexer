@@ -96,86 +96,69 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 
 	private boolean configureIndexMapping(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
-
-		return jdbcTemplate.execute(sqlForIndexMapping,
-				new PreparedStatementCallback<Boolean>() {
-
-					@Override
-					public Boolean doInPreparedStatement(
-							PreparedStatement preparedStatement)
-							throws SQLException, DataAccessException {
-						try {
-							preparedStatement.setString(1,
-									sourceTypeConfiguration.getSourceIndex());
-							preparedStatement.setString(2,
-									sourceTypeConfiguration.getSourceType());
-							preparedStatement.execute();
-							logger.info("Configured index_mapping table.");
-						} catch (SQLException sqlException) {
-							logger.error(
-									"Exception configuring index_mapping table. Cause;",
-									sqlException);
-							return false;
-						}
-						return true;
-					}
-				});
+		logger.info("Going to configure index_mapping table.");
+		return jdbcTemplate.execute(sqlForIndexMapping, (PreparedStatement preparedStatement) -> {
+			try {
+				preparedStatement.setString(1,
+						sourceTypeConfiguration.getSourceIndex());
+				preparedStatement.setString(2,
+						sourceTypeConfiguration.getSourceType());
+				preparedStatement.setQueryTimeout(20);
+				logger.info("About to configure index_mapping table.");
+				preparedStatement.execute();
+				logger.info("Configured index_mapping table.");
+			} catch (SQLException sqlException) {
+				logger.error(
+						"Exception configuring index_mapping table. Cause;",
+						sqlException);
+				return false;
+			}
+			return true;
+		});
+		
+		
 	}
 
 	private boolean configureSourceMapping(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
 
-		return jdbcTemplate.execute(sqlForSourceMapping,
-				new PreparedStatementCallback<Boolean>() {
-
-					@Override
-					public Boolean doInPreparedStatement(
-							PreparedStatement preparedStatement)
-							throws SQLException, DataAccessException {
-						try {
-							preparedStatement.setString(1,
-									sourceTypeConfiguration.getSourceType());
-							preparedStatement.setString(2,
-									sourceTypeConfiguration.getLogLocation());
-							preparedStatement.execute();
-							logger.info("Configured source_mapping table.");
-						} catch (SQLException sqlException) {
-							logger.error(
-									"Exception configuring source_mapping table. Cause;",
-									sqlException);
-							return false;
-						}
-						return true;
-					}
-				});
+		return jdbcTemplate.execute(sqlForSourceMapping, (PreparedStatement preparedStatement) -> {
+			try {
+				preparedStatement.setString(1,
+						sourceTypeConfiguration.getSourceType());
+				preparedStatement.setString(2,
+						sourceTypeConfiguration.getLogLocation());
+				preparedStatement.execute();
+				logger.info("Configured source_mapping table.");
+			} catch (SQLException sqlException) {
+				logger.error(
+						"Exception configuring source_mapping table. Cause;",
+						sqlException);
+				return false;
+			}
+			return true;
+		});
 	}
 
 	private boolean configureSourceMetadata(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
 
-		return jdbcTemplate.execute(sqlForSourceMetadata,
-				new PreparedStatementCallback<Boolean>() {
-
-					@Override
-					public Boolean doInPreparedStatement(
-							PreparedStatement preparedStatement)
-							throws SQLException, DataAccessException {
-						try {
-							preparedStatement.setString(1,
-									sourceTypeConfiguration.getSourceType());
-							preparedStatement.setString(2,
-									sourceTypeConfiguration.getLogLocation());
-							preparedStatement.execute();
-							logger.info("Configured source_metadata table.");
-						} catch (SQLException sqlException) {
-							logger.error(
-									"Exception configuring source_metadata table. Cause;",
-									sqlException);
-							return false;
-						}
-						return true;
-					}
-				});
+		return jdbcTemplate.execute(sqlForSourceMetadata, (PreparedStatement preparedStatement) -> {
+			try {
+				preparedStatement.setString(1,
+						sourceTypeConfiguration.getSourceType());
+				preparedStatement.setString(2,
+						sourceTypeConfiguration.getLogLocation());
+				preparedStatement.execute();
+				logger.info("Configured source_metadata table.");
+			} catch (SQLException sqlException) {
+				logger.error(
+						"Exception configuring source_metadata table. Cause;",
+						sqlException);
+				return false;
+			}
+			return true;
+		});
 	}
 
 }
