@@ -89,7 +89,13 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 			sqlForAlterTableStructuredEvent.append(" varchar2(100)");
 		}
 
-		jdbcTemplate.execute(sqlForAlterTableStructuredEvent.toString());
+		try {
+			//TODO Check if the column already exists.
+			//SELECT column_name FROM USER_TAB_COLUMNS WHERE table_name = 'structured_event'
+			jdbcTemplate.execute(sqlForAlterTableStructuredEvent.toString());
+		} catch (DataAccessException dataAccessException) {
+			logger.error("Error altering table structured_event; cause is {}", dataAccessException);
+		}
 
 		return true;
 	}
