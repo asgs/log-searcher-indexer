@@ -9,28 +9,28 @@ package net.tworks.logapps.rest.model;
  */
 public class SourceType {
 
-	private String logLocation;
+	private String source;
 
 	private String sourceType;
 
-	public SourceType(String logLocation, String sourceType) {
-		this.logLocation = logLocation;
+	public SourceType(String source, String sourceType) {
+		this.source = source;
 		this.sourceType = sourceType;
 	}
 
 	/**
-	 * @return the logLocation
+	 * @return the source
 	 */
-	public String getLogLocation() {
-		return logLocation;
+	public String getSource() {
+		return source;
 	}
 
 	/**
-	 * @param logLocation
-	 *            the logLocation to set
+	 * @param source
+	 *            the source to set
 	 */
-	public void setLogLocation(String logLocation) {
-		this.logLocation = logLocation;
+	public void setSource(String source) {
+		this.source = source;
 	}
 
 	/**

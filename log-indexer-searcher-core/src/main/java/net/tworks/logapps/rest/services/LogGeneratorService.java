@@ -4,13 +4,13 @@
 package net.tworks.logapps.rest.services;
 
 import java.util.List;
-import java.util.Map;
 
 import net.tworks.logapps.common.database.DataSourceManager;
-import net.tworks.logapps.rest.model.SearchResults;
 import net.tworks.logapps.rest.model.SourceType;
 import net.tworks.logapps.rest.model.SourceTypes;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,24 +29,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/log")
 public class LogGeneratorService {
 
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
 	private JdbcTemplate jdbcTemplate;
 
 	@RequestMapping(value = "/generate", method = RequestMethod.GET)
-	public SearchResults queryResults(@RequestParam(value = "data") String query) {
+	public boolean generateLogContent(
+			@RequestParam(value = "sourceType") String sourceType,
+			@RequestParam(value = "source") String source) {
 
-		SearchResults results = new SearchResults();
-		String[] resultsArray = { "log line1", "log line2", "log line3" };
-		results.setResults(resultsArray);
-		jdbcTemplate = DataSourceManager.getInstance().getJdbcTemplate();
-		List<Map<String, Object>> queryForList = jdbcTemplate
-				.queryForList("select * from users");
-		System.out.println("Ran query. Printing results.");
-		for (Map<String, Object> map : queryForList) {
-			for (String string : map.keySet()) {
-				System.out.println(string + ":" + map.get(string));
-			}
-		}
-		return results;
+		return true;
 
 	}
 
@@ -54,7 +46,7 @@ public class LogGeneratorService {
 	public SourceTypes queryResults() {
 
 		jdbcTemplate = DataSourceManager.getInstance().getJdbcTemplate();
-		System.out.println("Ran query. Printing results.");
+		logger.info("Ran query. Printing results.");
 
 		List<SourceType> sourceTypes = jdbcTemplate.query(
 				"select source_type, source from source_mapping", (resultSet,
@@ -67,7 +59,6 @@ public class LogGeneratorService {
 
 		SourceTypes sourceTypes2 = new SourceTypes();
 		sourceTypes2.setSourceTypes(sourceTypes);
-		;
 		return sourceTypes2;
 
 	}

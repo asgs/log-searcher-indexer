@@ -18,7 +18,7 @@ public class SourceTypeConfiguration {
 
 	private String sourceType;
 
-	private String logLocation;
+	private String source;
 
 	private String logPatternlayout;
 
@@ -50,13 +50,13 @@ public class SourceTypeConfiguration {
 	 * The default constructor used to populate the individual fields.
 	 * 
 	 * @param sourceType
-	 * @param logLocation
+	 * @param source
 	 * @param logPatternlayout
 	 */
-	public SourceTypeConfiguration(String sourceType, String logLocation,
+	public SourceTypeConfiguration(String sourceType, String source,
 			String logPatternlayout) {
 		this.sourceType = sourceType;
-		this.logLocation = logLocation;
+		this.source = source;
 		this.logPatternlayout = logPatternlayout;
 	}
 
@@ -76,18 +76,18 @@ public class SourceTypeConfiguration {
 	}
 
 	/**
-	 * @return the logLocation
+	 * @return the source
 	 */
-	public String getLogLocation() {
-		return logLocation;
+	public String getSource() {
+		return source;
 	}
 
 	/**
-	 * @param logLocation
-	 *            the logLocation to set
+	 * @param source
+	 *            the source to set
 	 */
-	public void setLogLocation(String logLocation) {
-		this.logLocation = logLocation;
+	public void setSource(String source) {
+		this.source = source;
 	}
 
 	/**

@@ -35,13 +35,13 @@ public class AdminService {
 
 	@RequestMapping(value = "/configure", method = RequestMethod.GET)
 	public void configureSourceType(
-			@RequestParam(value = "logLocation") String logLocation,
+			@RequestParam(value = "source") String source,
 			@RequestParam(value = "logPatternlayout") String logPatternLayout,
 			@RequestParam(value = "sourceType") String sourceType,
 			@RequestParam(value = "sourceIndex") String sourceIndex) {
 
 		SourceTypeConfiguration sourceTypeConfiguration = new SourceTypeConfiguration(
-				sourceType, logLocation, logPatternLayout);
+				sourceType, source, logPatternLayout);
 		// SourceIndex is not mandatory. Which means this sourceType can be
 		// added to the (only) existing sourceIndex in the database repository.
 		if (sourceIndex != null) {

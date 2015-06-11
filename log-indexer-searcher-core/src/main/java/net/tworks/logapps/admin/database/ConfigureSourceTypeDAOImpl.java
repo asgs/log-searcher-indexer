@@ -36,7 +36,7 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 
 	private final String sqlForSourceMapping = "insert into source_mapping (source_type, source) values (?, ?)";
 
-	private final String sqlForSourceMetadata = "insert into source_metadata (source_type, file_path) values (?, ?)";
+	private final String sqlForSourceMetadata = "insert into source_metadata (source_type, source, pattern_layout) values (?, ?, ?)";
 
 	private StringBuilder sqlForAlterTableStructuredEvent = new StringBuilder(
 			"alter table structured_event");
@@ -103,7 +103,6 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 
 	private boolean configureIndexMapping(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
-		logger.info("Going to configure index_mapping table.");
 		return jdbcTemplate.execute(sqlForIndexMapping, (
 				PreparedStatement preparedStatement) -> {
 			try {
@@ -112,7 +111,6 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 				preparedStatement.setString(2,
 						sourceTypeConfiguration.getSourceType());
 				preparedStatement.setQueryTimeout(20);
-				logger.info("About to configure index_mapping table.");
 				preparedStatement.execute();
 				logger.info("Configured index_mapping table.");
 			} catch (SQLException sqlException) {
@@ -135,7 +133,7 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 				preparedStatement.setString(1,
 						sourceTypeConfiguration.getSourceType());
 				preparedStatement.setString(2,
-						sourceTypeConfiguration.getLogLocation());
+						sourceTypeConfiguration.getSource());
 				preparedStatement.execute();
 				logger.info("Configured source_mapping table.");
 			} catch (SQLException sqlException) {
@@ -157,7 +155,9 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 				preparedStatement.setString(1,
 						sourceTypeConfiguration.getSourceType());
 				preparedStatement.setString(2,
-						sourceTypeConfiguration.getLogLocation());
+						sourceTypeConfiguration.getSource());
+				preparedStatement.setString(3,
+						sourceTypeConfiguration.getLogPatternlayout());
 				preparedStatement.execute();
 				logger.info("Configured source_metadata table.");
 			} catch (SQLException sqlException) {
