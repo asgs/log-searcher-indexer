@@ -7,17 +7,16 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.stereotype.Component;
-
 import net.tworks.logapps.common.database.DBTableManager;
 import net.tworks.logapps.common.database.DataSourceManager;
 import net.tworks.logapps.common.database.exception.DatabaseConfigurationException;
 import net.tworks.logapps.common.model.SourceTypeConfiguration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
 /**
  * @author asgs
@@ -90,11 +89,13 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 		}
 
 		try {
-			//TODO Check if the column already exists.
-			//SELECT column_name FROM USER_TAB_COLUMNS WHERE table_name = 'structured_event'
+			// TODO Check if the column already exists.
+			// SELECT column_name FROM USER_TAB_COLUMNS WHERE table_name =
+			// 'structured_event'
 			jdbcTemplate.execute(sqlForAlterTableStructuredEvent.toString());
 		} catch (DataAccessException dataAccessException) {
-			logger.error("Error altering table structured_event; cause is {}", dataAccessException);
+			logger.error("Error altering table structured_event; cause is {}",
+					dataAccessException);
 		}
 
 		return true;
@@ -103,7 +104,8 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 	private boolean configureIndexMapping(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
 		logger.info("Going to configure index_mapping table.");
-		return jdbcTemplate.execute(sqlForIndexMapping, (PreparedStatement preparedStatement) -> {
+		return jdbcTemplate.execute(sqlForIndexMapping, (
+				PreparedStatement preparedStatement) -> {
 			try {
 				preparedStatement.setString(1,
 						sourceTypeConfiguration.getSourceIndex());
@@ -121,14 +123,14 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 			}
 			return true;
 		});
-		
-		
+
 	}
 
 	private boolean configureSourceMapping(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
 
-		return jdbcTemplate.execute(sqlForSourceMapping, (PreparedStatement preparedStatement) -> {
+		return jdbcTemplate.execute(sqlForSourceMapping, (
+				PreparedStatement preparedStatement) -> {
 			try {
 				preparedStatement.setString(1,
 						sourceTypeConfiguration.getSourceType());
@@ -149,7 +151,8 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 	private boolean configureSourceMetadata(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
 
-		return jdbcTemplate.execute(sqlForSourceMetadata, (PreparedStatement preparedStatement) -> {
+		return jdbcTemplate.execute(sqlForSourceMetadata, (
+				PreparedStatement preparedStatement) -> {
 			try {
 				preparedStatement.setString(1,
 						sourceTypeConfiguration.getSourceType());

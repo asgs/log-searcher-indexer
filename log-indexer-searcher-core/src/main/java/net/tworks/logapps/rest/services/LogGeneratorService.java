@@ -8,6 +8,8 @@ import java.util.Map;
 
 import net.tworks.logapps.common.database.DataSourceManager;
 import net.tworks.logapps.rest.model.SearchResults;
+import net.tworks.logapps.rest.model.SourceType;
+import net.tworks.logapps.rest.model.SourceTypes;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author asgs
+ * 
+ *         This is more like a convenience module for the user to be able to
+ *         generate log content quickly so that search could be demonstrated
+ *         dynamically.
  * 
  */
 @RestController
@@ -44,4 +50,25 @@ public class LogGeneratorService {
 
 	}
 
+	@RequestMapping(value = "/retrieveAvailableLogs", method = RequestMethod.GET)
+	public SourceTypes queryResults() {
+
+		jdbcTemplate = DataSourceManager.getInstance().getJdbcTemplate();
+		System.out.println("Ran query. Printing results.");
+
+		List<SourceType> sourceTypes = jdbcTemplate.query(
+				"select source_type, source from source_mapping", (resultSet,
+						rowNum) -> {
+					String sourceType = resultSet.getString("source_type");
+					String source = resultSet.getString("source");
+					SourceType type = new SourceType(source, sourceType);
+					return type;
+				});
+
+		SourceTypes sourceTypes2 = new SourceTypes();
+		sourceTypes2.setSourceTypes(sourceTypes);
+		;
+		return sourceTypes2;
+
+	}
 }

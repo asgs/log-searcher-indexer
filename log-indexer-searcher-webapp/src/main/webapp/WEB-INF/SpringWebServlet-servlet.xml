@@ -12,10 +12,11 @@
 	        http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd">
 	<mvc:annotation-driven />
 	<context:annotation-config />
-	<context:component-scan base-package="net.tworks.logapps" />
+	<mvc:default-servlet-handler />
+	<context:component-scan base-package="net.tworks.logapps.*" />
 
 	<bean id="searchDBDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="java:comp/env/jdbc/searchdb" />
+		<property name="jndiName" value="java:/comp/env/jdbc/searchdb" />
 	</bean>
 
 
