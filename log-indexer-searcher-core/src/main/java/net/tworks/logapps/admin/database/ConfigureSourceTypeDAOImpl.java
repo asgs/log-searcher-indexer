@@ -11,9 +11,12 @@ import net.tworks.logapps.common.database.DBTableManager;
 import net.tworks.logapps.common.database.DataSourceManager;
 import net.tworks.logapps.common.database.exception.DatabaseConfigurationException;
 import net.tworks.logapps.common.model.SourceTypeConfiguration;
+import net.tworks.logapps.index.watch.FileWatcher;
+import net.tworks.logapps.index.watch.Jdk7FileWatcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -30,13 +33,16 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	@Autowired
+	private FileWatcher fileWatcher;
+
 	private DBTableManager dbTableManager;
 
 	private final String sqlForIndexMapping = "insert into index_mapping (search_index, source_type) values (?, ?)";
 
 	private final String sqlForSourceMapping = "insert into source_mapping (source_type, source) values (?, ?)";
 
-	private final String sqlForSourceMetadata = "insert into source_metadata (source_type, source, pattern_layout) values (?, ?, ?)";
+	private final String sqlForSourceMetadata = "insert into source_metadata (source_type, source, pattern_layout, timestamp_format) values (?, ?, ?, ?)";
 
 	private StringBuilder sqlForAlterTableStructuredEvent = new StringBuilder(
 			"alter table structured_event");
@@ -98,6 +104,8 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 					dataAccessException);
 		}
 
+		fileWatcher.watchOutForChanges(sourceTypeConfiguration.getSource());
+
 		return true;
 	}
 
@@ -158,6 +166,8 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 						sourceTypeConfiguration.getSource());
 				preparedStatement.setString(3,
 						sourceTypeConfiguration.getLogPatternlayout());
+				preparedStatement.setString(4,
+						sourceTypeConfiguration.getTimeStampFormat());
 				preparedStatement.execute();
 				logger.info("Configured source_metadata table.");
 			} catch (SQLException sqlException) {

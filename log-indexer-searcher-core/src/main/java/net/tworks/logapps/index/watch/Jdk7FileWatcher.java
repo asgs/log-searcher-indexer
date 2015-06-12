@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.tworks.logapps.indexing;
+package net.tworks.logapps.index.watch;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,10 +14,21 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PostConstruct;
+
+import net.tworks.logapps.common.model.SourceDTO;
+import net.tworks.logapps.index.persist.LogDataPersister;
+
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.sun.nio.file.SensitivityWatchEventModifier;
 
@@ -28,16 +39,27 @@ import com.sun.nio.file.SensitivityWatchEventModifier;
  *         <code>WatchService</code> API.
  *
  */
-public class Jdk7FileWatcher implements FileWatcher {
+@Component
+public class Jdk7FileWatcher extends Observable implements FileWatcher {
 
-	private static WatchService watchService;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private static Map<String, Long> filePositionMap;
+	private WatchService watchService;
 
-	public void initializeWatcher() {
+	private Map<String, Long> filePositionMap;
+
+	private boolean keepThreadRunning;
+
+	@Autowired
+	private LogDataPersister logDataPersister;
+
+	@PostConstruct
+	public void initialize() {
 		try {
 			watchService = FileSystems.getDefault().newWatchService();
 			filePositionMap = new ConcurrentHashMap<String, Long>();
+			logger.info("WatchService initialized with watchService {}.",
+					watchService);
 			Thread thread = new Thread(new Runnable() {
 
 				@Override
@@ -46,10 +68,12 @@ public class Jdk7FileWatcher implements FileWatcher {
 
 				}
 			});
+			keepThreadRunning = true;
 			thread.start();
+			logger.info("WatchService background daemon spawned off.");
+			registerObserver(logDataPersister);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Exception creating WatchService {}.", e);
 		}
 	}
 
@@ -58,31 +82,37 @@ public class Jdk7FileWatcher implements FileWatcher {
 	 */
 	public static void main(String[] args) {
 		Jdk7FileWatcher fileWatcherTest = new Jdk7FileWatcher();
-		fileWatcherTest.initializeWatcher();
+		fileWatcherTest.initialize();
 		fileWatcherTest
 				.watchOutForChanges("D:/DLs/apache-tomcat-8.0.15-windows-x64/logs/localhost_access_log.2015-06-12.txt");
 
 	}
 
-	private static void registerFileForWatching(final String fileName) {
+	private void registerFileForWatching(final String fileName) {
+		logger.info("Going to register file {}.", fileName);
 		int lastIndexOfSlash = fileName.lastIndexOf("/");
 		String directoryName = fileName.substring(0, lastIndexOfSlash);
 		Path directory = Paths.get(directoryName);
 		try {
+			logger.info("Directory instance is {}.", directory);
+			logger.info("watchService instance is {}.", watchService);
 			directory.register(watchService, new WatchEvent.Kind[] {
 					StandardWatchEventKinds.ENTRY_MODIFY,
 					StandardWatchEventKinds.ENTRY_CREATE,
 					StandardWatchEventKinds.ENTRY_DELETE },
 					SensitivityWatchEventModifier.HIGH);
 			filePositionMap.put(fileName, 0L);
+			logger.info(
+					"Successfully register directory {} to the WatchService {}.",
+					directory);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Exception registering directory {}; cause is {}.",
+					directory, e);
 		}
 	}
 
 	private void pollFileChanges() {
-		while (true) {
+		while (keepThreadRunning) {
 			WatchKey watchKey;
 			try {
 				watchKey = watchService.take();
@@ -90,40 +120,44 @@ public class Jdk7FileWatcher implements FileWatcher {
 				for (WatchEvent watchEvent : pollEvents) {
 					Path path = (Path) watchEvent.context();
 					String string = path.toString();
-					System.out.println(string);
-					System.out.println(watchEvent.kind().name());
+					logger.info(
+							"Received watch notification for {}. WatchEvent kind is {}",
+							string, watchEvent.kind().name());
 					Set<String> keySet = filePositionMap.keySet();
 					for (String fileName : keySet) {
 						readNewContent(fileName);
 					}
 
-					// readNewContent("D:/DLs/apache-tomcat-8.0.15-windows-x64/logs/localhost_access_log.2015-06-12.txt");
 				}
 				watchKey.reset();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(
+						"Exception retrieving watchKey from WatchService. cause is {}.",
+						e);
 			}
 
 		}
 	}
 
-	private static void readFile(String fileName) {
+	private void readFile(String fileName) {
 		try {
 			byte[] byteArray = IOUtils
 					.toByteArray(new FileInputStream(fileName));
 			filePositionMap.put(fileName, (long) byteArray.length);
-			System.out.println("Current content below.");
-			System.out.println(new String(byteArray, "UTF-8"));
+			logger.info("Current content below.");
+			String fileContents = new String(byteArray, "UTF-8");
+			logger.info(fileContents);
 			// This should ideally be delegated to the parser to split the
 			// messages and persist to the data store.
+			setChanged();
+			SourceDTO sourceDTO = new SourceDTO(fileName, fileContents);
+			notifyObservers(sourceDTO);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Exception reading file {}; cause is {}.", fileName, e);
 		}
 	}
 
-	private static void readNewContent(String fileName) {
+	private void readNewContent(String fileName) {
 		try {
 			FileInputStream fileInputStream = new FileInputStream(fileName);
 			long byteLocation = filePositionMap.get(fileName);
@@ -131,13 +165,16 @@ public class Jdk7FileWatcher implements FileWatcher {
 			byte[] byteArray = IOUtils.toByteArray(fileInputStream);
 			byteLocation += byteArray.length;
 			filePositionMap.put(fileName, byteLocation);
-			System.out.println("New content below.");
-			String string = new String(byteArray, "UTF-8");
+			logger.info("New content below.");
+			String fileContents = new String(byteArray, "UTF-8");
 			// The separator should be configurable based on the Platform.
-			String[] splits = string.split("\n");
-			for (String split : splits) {
-				System.out.println(split);
+			String[] lines = fileContents.split("\n");
+			for (String line : lines) {
+				logger.info(line);
 			}
+			setChanged();
+			SourceDTO sourceDTO = new SourceDTO(fileName, fileContents);
+			notifyObservers(sourceDTO);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -149,5 +186,24 @@ public class Jdk7FileWatcher implements FileWatcher {
 	public void watchOutForChanges(String fullyQualifiedFileName) {
 		registerFileForWatching(fullyQualifiedFileName);
 		readFile(fullyQualifiedFileName);
+	}
+
+	public void registerObserver(Observer observer) {
+		logger.info("Registering observer {}.", observer);
+		addObserver(observer);
+		logger.info("Registered observer {}.", observer);
+	}
+
+	@Override
+	public void cleanUp() {
+		keepThreadRunning = false;
+		if (watchService != null) {
+			try {
+				watchService.close();
+			} catch (IOException e) {
+				logger.error("Error closing watchService {}", e);
+			}
+		}
+
 	}
 }

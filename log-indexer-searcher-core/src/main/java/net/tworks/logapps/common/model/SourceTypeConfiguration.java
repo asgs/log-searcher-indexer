@@ -23,6 +23,8 @@ public class SourceTypeConfiguration {
 	private String logPatternlayout;
 
 	private List<String> tokens;
+	
+	private String timeStampFormat;
 
 	/**
 	 * @return the sourceIndex
@@ -118,6 +120,20 @@ public class SourceTypeConfiguration {
 	 */
 	public void setTokens(List<String> tokens) {
 		this.tokens = tokens;
+	}
+
+	/**
+	 * @return the timeStampFormat
+	 */
+	public String getTimeStampFormat() {
+		return timeStampFormat;
+	}
+
+	/**
+	 * @param timeStampFormat the timeStampFormat to set
+	 */
+	public void setTimeStampFormat(String timeStampFormat) {
+		this.timeStampFormat = timeStampFormat;
 	}
 
 }

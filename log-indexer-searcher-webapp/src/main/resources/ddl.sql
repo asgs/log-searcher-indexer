@@ -21,7 +21,7 @@ CREATE TABLE index_mapping
 CREATE TABLE source_mapping
   (
     source_type VARCHAR2(20),
-    source      VARCHAR2(20) NOT NULL,
+    source VARCHAR2(200) NOT NULL,
     CONSTRAINT source_pk PRIMARY KEY (source_type)
   );
 
@@ -31,6 +31,7 @@ CREATE TABLE source_metadata
     host varchar2(50) DEFAULT 'localhost' NOT NULL,
 	source varchar2(200) NOT NULL,
 	pattern_layout varchar2(200) NOT NULL,
+	timestamp_format varchar2(30),
 	CONSTRAINT source_metadata_fk FOREIGN KEY (source_type) REFERENCES source_mapping (source_type)
   );
 

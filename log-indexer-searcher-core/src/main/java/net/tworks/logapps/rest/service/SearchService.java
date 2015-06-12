@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.tworks.logapps.rest.services;
+package net.tworks.logapps.rest.service;
 
 import java.util.List;
 import java.util.Map;
