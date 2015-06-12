@@ -9,6 +9,7 @@ import net.tworks.logapps.admin.database.ConfigureSourceTypeDAO;
 import net.tworks.logapps.admin.parser.LogPatternLayoutParser;
 import net.tworks.logapps.common.database.exception.DatabaseConfigurationException;
 import net.tworks.logapps.common.model.SourceTypeConfiguration;
+import net.tworks.logapps.indexing.FileWatcher;
 import net.tworks.logapps.rest.model.ConfigurationResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,11 @@ public class AdminService {
 	@Autowired
 	private ConfigureSourceTypeDAO configureSourceTypeDAO;
 
+	@Autowired
+	private FileWatcher fileWatcher;
+
 	@RequestMapping(value = "/configure", method = RequestMethod.GET)
-	public void configureSourceType(
+	public ConfigurationResult configureSourceType(
 			@RequestParam(value = "source") String source,
 			@RequestParam(value = "logPatternlayout") String logPatternLayout,
 			@RequestParam(value = "sourceType") String sourceType,
@@ -60,12 +64,14 @@ public class AdminService {
 			configurationResult.setResult(true);
 			configurationResult
 					.setMessage("Successfully configured for indexing.");
+			int lastIndexOfSlash = source.lastIndexOf("/");
+			fileWatcher.watchOutForChanges(source);
 		} catch (DatabaseConfigurationException databaseConfigurationException) {
 			configurationResult.setResult(false);
 			configurationResult
 					.setMessage("Failed to configured for indexing. Reason is "
 							+ databaseConfigurationException.getMessage());
 		}
-
+		return configurationResult;
 	}
 }

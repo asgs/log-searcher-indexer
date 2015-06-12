@@ -20,6 +20,6 @@ public interface FileWatcher {
 	 * 
 	 * @param file
 	 */
-	void watchOutForChanges(File file);
+	void watchOutForChanges(String fullyQualifiedFileName);
 
 }
