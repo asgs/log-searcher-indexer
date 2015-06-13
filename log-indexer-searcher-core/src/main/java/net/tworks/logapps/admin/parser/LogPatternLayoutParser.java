@@ -26,7 +26,7 @@ public class LogPatternLayoutParser {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private final static String TIMESTAMP_PATTERN_STRING = ".*%d[ate]*\\{([\\w\\.\\:]+)}.*";
+	private final static String TIMESTAMP_PATTERN_STRING = ".*%d[ate]*\\{([\\w.'/\\-':]+)}.*";
 
 	private final static Pattern TIMESTAMP_REGEX_PATTERN = Pattern
 			.compile(TIMESTAMP_PATTERN_STRING);
@@ -84,8 +84,37 @@ public class LogPatternLayoutParser {
 		return timeStampFormat;
 	}
 
+	public boolean hasTimeStampField() {
+		Matcher matcher = TIMESTAMP_REGEX_PATTERN.matcher(logPatternLayout);
+		return matcher.matches();
+	}
+
+	public int findPositionOfTimeStampField() {
+		int index = 0;
+		if (hasTimeStampField()) {
+
+			String[] splits = logPatternLayout.split(" ");
+			for (String split : splits) {
+				if (split.matches(TIMESTAMP_PATTERN_STRING)) {
+					break;
+				}
+				index++;
+			}
+
+			return index;
+		} else {
+			return --index;
+		}
+	}
+
 	public static void main(String[] args) {
 		// System.out.println(parseLogLevel());
+		LogPatternLayoutParser logPatternLayoutParser = new LogPatternLayoutParser(
+				"%X{IP} %X{field1} %X{field2} [%date{dd/MMM/yyyy:HH:mm:ssZ} guid=%{guid} userId=%{userId} %msg%n");
+		System.out.println(logPatternLayoutParser.hasTimeStampField());
+		System.out.println(logPatternLayoutParser.parseTimeStampFormat());
+		System.out.println(logPatternLayoutParser
+				.findPositionOfTimeStampField());
 	}
 
 }

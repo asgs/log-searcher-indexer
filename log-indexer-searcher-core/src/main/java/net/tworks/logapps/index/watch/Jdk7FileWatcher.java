@@ -48,7 +48,7 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 
 	private Map<String, Long> filePositionMap;
 
-	private boolean keepThreadRunning;
+	private boolean threadShouldRun;
 
 	@Autowired
 	private LogDataPersister logDataPersister;
@@ -64,11 +64,17 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 
 				@Override
 				public void run() {
-					pollFileChanges();
+					try {
+						pollFileChanges();
+					} catch (Exception exception) {
+						logger.error(
+								"Exception polling chnages. Continuing to poll though. Cause is {}.",
+								exception);
+					}
 
 				}
 			});
-			keepThreadRunning = true;
+			threadShouldRun = true;
 			thread.start();
 			logger.info("WatchService background daemon spawned off.");
 			registerObserver(logDataPersister);
@@ -94,8 +100,10 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 		String directoryName = fileName.substring(0, lastIndexOfSlash);
 		Path directory = Paths.get(directoryName);
 		try {
-			logger.info("Directory instance is {}.", directory);
-			logger.info("watchService instance is {}.", watchService);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Directory instance is {}.", directory);
+				logger.debug("watchService instance is {}.", watchService);
+			}
 			directory.register(watchService, new WatchEvent.Kind[] {
 					StandardWatchEventKinds.ENTRY_MODIFY,
 					StandardWatchEventKinds.ENTRY_CREATE,
@@ -103,7 +111,7 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 					SensitivityWatchEventModifier.HIGH);
 			filePositionMap.put(fileName, 0L);
 			logger.info(
-					"Successfully register directory {} to the WatchService {}.",
+					"Successfully registered directory {} to the WatchService {}.",
 					directory);
 		} catch (IOException e) {
 			logger.error("Exception registering directory {}; cause is {}.",
@@ -112,12 +120,13 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 	}
 
 	private void pollFileChanges() {
-		while (keepThreadRunning) {
+		while (threadShouldRun) {
 			WatchKey watchKey;
 			try {
 				watchKey = watchService.take();
 				List<WatchEvent<?>> pollEvents = watchKey.pollEvents();
-				for (WatchEvent watchEvent : pollEvents) {
+				for (@SuppressWarnings("rawtypes")
+				WatchEvent watchEvent : pollEvents) {
 					Path path = (Path) watchEvent.context();
 					String string = path.toString();
 					logger.info(
@@ -140,9 +149,8 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 	}
 
 	private void readFile(String fileName) {
-		try {
-			byte[] byteArray = IOUtils
-					.toByteArray(new FileInputStream(fileName));
+		try (FileInputStream fileInputStream = new FileInputStream(fileName)) {
+			byte[] byteArray = IOUtils.toByteArray(fileInputStream);
 			filePositionMap.put(fileName, (long) byteArray.length);
 			logger.info("Current content below.");
 			String fileContents = new String(byteArray, "UTF-8");
@@ -158,27 +166,27 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 	}
 
 	private void readNewContent(String fileName) {
-		try {
-			FileInputStream fileInputStream = new FileInputStream(fileName);
+		try (FileInputStream fileInputStream = new FileInputStream(fileName)) {
 			long byteLocation = filePositionMap.get(fileName);
 			fileInputStream.skip(byteLocation);
 			byte[] byteArray = IOUtils.toByteArray(fileInputStream);
 			byteLocation += byteArray.length;
 			filePositionMap.put(fileName, byteLocation);
-			logger.info("New content below.");
 			String fileContents = new String(byteArray, "UTF-8");
 			// The separator should be configurable based on the Platform.
-			String[] lines = fileContents.split("\n");
-			for (String line : lines) {
-				logger.info(line);
+			if (logger.isDebugEnabled()) {
+				String[] lines = fileContents.split("\n");
+				logger.info("New content below.");
+				for (String line : lines) {
+					logger.debug(line);
+				}
 			}
 			setChanged();
 			SourceDTO sourceDTO = new SourceDTO(fileName, fileContents);
 			notifyObservers(sourceDTO);
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Exception reading file {}; cause is {}.", fileName, e);
 		}
 	}
 
@@ -196,10 +204,11 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 
 	@Override
 	public void cleanUp() {
-		keepThreadRunning = false;
+		threadShouldRun = false;
 		if (watchService != null) {
 			try {
 				watchService.close();
+				logger.info("Shutting down watchService and the background thread.");
 			} catch (IOException e) {
 				logger.error("Error closing watchService {}", e);
 			}
