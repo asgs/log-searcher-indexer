@@ -9,6 +9,7 @@ import java.util.Map;
 import net.tworks.logapps.common.database.DataSourceManager;
 import net.tworks.logapps.rest.model.SearchResults;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,13 +26,16 @@ public class SearchService {
 
 	private JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	private DataSourceManager dataSourceManager;
+
 	@RequestMapping(value = "/query", method = RequestMethod.GET)
 	public SearchResults queryResults(@RequestParam(value = "data") String query) {
 
 		SearchResults results = new SearchResults();
 		String[] resultsArray = { "log line1", "log line2", "log line3" };
 		results.setResults(resultsArray);
-		jdbcTemplate = DataSourceManager.getInstance().getJdbcTemplate();
+		jdbcTemplate = dataSourceManager.getJdbcTemplate();
 		List<Map<String, Object>> queryForList = jdbcTemplate
 				.queryForList("select * from users");
 		System.out.println("Ran query. Printing results.");

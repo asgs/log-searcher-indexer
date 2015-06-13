@@ -5,15 +5,12 @@ package net.tworks.logapps.listener;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 
 import net.tworks.logapps.index.persist.LogDataPersister;
 import net.tworks.logapps.index.watch.FileWatcher;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * @author asgs

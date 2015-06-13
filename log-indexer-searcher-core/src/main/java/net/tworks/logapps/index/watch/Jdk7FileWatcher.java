@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import net.tworks.logapps.common.model.SourceDTO;
 import net.tworks.logapps.index.persist.LogDataPersister;
@@ -64,14 +65,7 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 
 				@Override
 				public void run() {
-					try {
-						pollFileChanges();
-					} catch (Exception exception) {
-						logger.error(
-								"Exception polling chnages. Continuing to poll though. Cause is {}.",
-								exception);
-					}
-
+					pollFileChanges();
 				}
 			});
 			threadShouldRun = true;
@@ -143,6 +137,10 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 				logger.error(
 						"Exception retrieving watchKey from WatchService. cause is {}.",
 						e);
+			} catch (Exception exception) {
+				logger.error(
+						"Exception polling changes. Continuing to poll though. Cause is {}.",
+						exception);
 			}
 
 		}
@@ -203,6 +201,7 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 	}
 
 	@Override
+	@PreDestroy
 	public void cleanUp() {
 		threadShouldRun = false;
 		if (watchService != null) {

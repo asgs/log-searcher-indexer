@@ -11,6 +11,7 @@ import net.tworks.logapps.rest.model.SourceTypes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,6 +34,9 @@ public class LogGeneratorService {
 
 	private JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	private DataSourceManager dataSourceManager;
+
 	@RequestMapping(value = "/generate", method = RequestMethod.GET)
 	public boolean generateLogContent(
 			@RequestParam(value = "sourceType") String sourceType,
@@ -45,7 +49,7 @@ public class LogGeneratorService {
 	@RequestMapping(value = "/retrieveAvailableLogs", method = RequestMethod.GET)
 	public SourceTypes queryResults() {
 
-		jdbcTemplate = DataSourceManager.getInstance().getJdbcTemplate();
+		jdbcTemplate = dataSourceManager.getJdbcTemplate();
 		logger.info("Ran query. Printing results.");
 
 		List<SourceType> sourceTypes = jdbcTemplate.query(

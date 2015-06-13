@@ -3,25 +3,18 @@
  */
 package net.tworks.logapps.rest.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 import net.tworks.logapps.common.database.DataSourceManager;
-import net.tworks.logapps.rest.model.SearchResults;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -34,12 +27,15 @@ public class TestDBService {
 
 	private JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	private DataSourceManager dataSourceManager;
+
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@RequestMapping(value = "/query", method = RequestMethod.GET)
 	public void queryResults() {
 
-		jdbcTemplate = DataSourceManager.getInstance().getJdbcTemplate();
+		jdbcTemplate = dataSourceManager.getJdbcTemplate();
 		/*
 		 * jdbcTemplate .queryForObject(
 		 * "select to_timestamp_tz(event_timestamp) from raw_event where event_id=?"

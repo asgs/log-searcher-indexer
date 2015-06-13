@@ -8,7 +8,10 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
 /**
  * @author asgs
@@ -19,14 +22,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
  *         have to called by the callers.
  * 
  */
+@Component
 public class DataSourceManager {
-	private static final DataSourceManager INSTANCE = new DataSourceManager();
+	private static DataSourceManager INSTANCE;
 	private static final String JNDI_NAME = "jdbc/searchdb";
 	private static JdbcTemplate jdbcTemplate;
 	private static DataSource dataSource;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private DataSourceManager() {
-		// Prevent instantiation.
+	public DataSourceManager() {
+		init();
 	}
 
 	public void init() {
@@ -36,7 +41,7 @@ public class DataSourceManager {
 			Context envContext = (Context) initContext.lookup("java:/comp/env");
 			dataSource = (DataSource) envContext.lookup(JNDI_NAME);
 			jdbcTemplate = new JdbcTemplate(dataSource);
-			System.out.println("Created jdbcTemplate.");
+			logger.info("Created jdbcTemplate instance.");
 		} catch (NamingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

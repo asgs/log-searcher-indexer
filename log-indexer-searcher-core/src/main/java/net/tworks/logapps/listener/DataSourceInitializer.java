@@ -3,9 +3,8 @@
  */
 package net.tworks.logapps.listener;
 
-import javax.servlet.ServletContextListener;
 import javax.servlet.ServletContextEvent;
-import javax.servlet.annotation.WebListener;
+import javax.servlet.ServletContextListener;
 
 import net.tworks.logapps.common.database.DataSourceManager;
 
@@ -17,7 +16,6 @@ import net.tworks.logapps.common.database.DataSourceManager;
  *         application.
  * 
  */
-@WebListener
 public class DataSourceInitializer implements ServletContextListener {
 
 	@Override

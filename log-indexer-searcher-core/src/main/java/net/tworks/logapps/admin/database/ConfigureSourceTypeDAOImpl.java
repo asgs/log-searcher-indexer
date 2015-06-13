@@ -7,12 +7,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
-import net.tworks.logapps.common.database.DBTableManager;
 import net.tworks.logapps.common.database.DataSourceManager;
 import net.tworks.logapps.common.database.exception.DatabaseConfigurationException;
 import net.tworks.logapps.common.model.SourceTypeConfiguration;
 import net.tworks.logapps.index.watch.FileWatcher;
-import net.tworks.logapps.index.watch.Jdk7FileWatcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author asgs
@@ -36,7 +35,8 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 	@Autowired
 	private FileWatcher fileWatcher;
 
-	private DBTableManager dbTableManager;
+	@Autowired
+	private DataSourceManager dataSourceManager;
 
 	private final String sqlForIndexMapping = "insert into index_mapping (search_index, source_type) values (?, ?)";
 
@@ -53,12 +53,12 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 	 * @param sourceTypeConfiguration
 	 * @return whether the operation was successful or not.
 	 */
+	@Transactional
 	public boolean configureNewSourceType(
 			SourceTypeConfiguration sourceTypeConfiguration)
 			throws DatabaseConfigurationException {
 
-		JdbcTemplate jdbcTemplate = DataSourceManager.getInstance()
-				.getJdbcTemplate();
+		JdbcTemplate jdbcTemplate = dataSourceManager.getJdbcTemplate();
 
 		// Check if source index is present. if present, need to add a row in
 		// the index_mapping table for this source_type.
@@ -88,20 +88,25 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 		// the table structured_event to dynamically add corresponding columns.
 
 		List<String> tokens = sourceTypeConfiguration.getTokens();
-		for (String token : tokens) {
-			sqlForAlterTableStructuredEvent.append(" add ");
-			sqlForAlterTableStructuredEvent.append(token);
-			sqlForAlterTableStructuredEvent.append(" varchar2(100)");
-		}
+		if (!tokens.isEmpty()) {
+			for (String token : tokens) {
+				sqlForAlterTableStructuredEvent.append(" add ");
+				sqlForAlterTableStructuredEvent.append(token);
+				sqlForAlterTableStructuredEvent.append(" varchar2(100)");
+			}
 
-		try {
-			// TODO Check if the column already exists.
-			// SELECT column_name FROM USER_TAB_COLUMNS WHERE table_name =
-			// 'structured_event'
-			jdbcTemplate.execute(sqlForAlterTableStructuredEvent.toString());
-		} catch (DataAccessException dataAccessException) {
-			logger.error("Error altering table structured_event; cause is {}",
-					dataAccessException);
+			try {
+				// TODO Check if the column already exists.
+				// SELECT column_name FROM USER_TAB_COLUMNS WHERE table_name =
+				// 'structured_event'
+				jdbcTemplate
+						.execute(sqlForAlterTableStructuredEvent.toString());
+			} catch (DataAccessException dataAccessException) {
+				logger.error(
+						"Error altering table structured_event; cause is {}",
+						dataAccessException);
+			}
+
 		}
 
 		fileWatcher.watchOutForChanges(sourceTypeConfiguration.getSource());

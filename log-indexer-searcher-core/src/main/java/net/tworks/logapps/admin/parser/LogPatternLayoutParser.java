@@ -26,7 +26,7 @@ public class LogPatternLayoutParser {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private final static String TIMESTAMP_PATTERN_STRING = ".*%d[ate]*\\{([\\w.'/\\-':]+)}.*";
+	private final static String TIMESTAMP_PATTERN_STRING = ".*%d[ate]*\\{([\\w.\\s'/\\-':]+)[\\}]*.*";
 
 	private final static Pattern TIMESTAMP_REGEX_PATTERN = Pattern
 			.compile(TIMESTAMP_PATTERN_STRING);
@@ -86,6 +86,9 @@ public class LogPatternLayoutParser {
 
 	public boolean hasTimeStampField() {
 		Matcher matcher = TIMESTAMP_REGEX_PATTERN.matcher(logPatternLayout);
+		/*System.out.println(matcher.group(1));
+		System.out.println(matcher.start());
+		System.out.println(matcher.end());*/
 		return matcher.matches();
 	}
 
@@ -110,7 +113,7 @@ public class LogPatternLayoutParser {
 	public static void main(String[] args) {
 		// System.out.println(parseLogLevel());
 		LogPatternLayoutParser logPatternLayoutParser = new LogPatternLayoutParser(
-				"%X{IP} %X{field1} %X{field2} [%date{dd/MMM/yyyy:HH:mm:ssZ} guid=%{guid} userId=%{userId} %msg%n");
+				"%X{IP} %X{field1} %X{field2} [%date{dd/MMM/yyyy:HH:mm:ss Z}] %msg%n");
 		System.out.println(logPatternLayoutParser.hasTimeStampField());
 		System.out.println(logPatternLayoutParser.parseTimeStampFormat());
 		System.out.println(logPatternLayoutParser
