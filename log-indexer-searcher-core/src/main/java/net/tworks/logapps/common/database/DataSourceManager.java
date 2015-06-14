@@ -27,7 +27,12 @@ public class DataSourceManager {
 	private static DataSourceManager INSTANCE;
 	private static final String JNDI_NAME = "jdbc/searchdb";
 	private static JdbcTemplate jdbcTemplate;
-	private static DataSource dataSource;
+	/*
+	 * @Autowired
+	 * 
+	 * @Qualifier("searchDBDataSource")
+	 */
+	private DataSource dataSource;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public DataSourceManager() {
@@ -35,6 +40,7 @@ public class DataSourceManager {
 	}
 
 	public void init() {
+		// TODO - try to replace this piece with Spring configuration.
 		Context initContext;
 		try {
 			initContext = new InitialContext();
@@ -47,6 +53,12 @@ public class DataSourceManager {
 			e.printStackTrace();
 		}
 	}
+
+	/*
+	 * @PostConstruct public void initJdbcTemplate() { jdbcTemplate = new
+	 * JdbcTemplate(dataSource); logger.info("Created jdbcTemplate instance.");
+	 * }
+	 */
 
 	public static DataSourceManager getInstance() {
 		return INSTANCE;

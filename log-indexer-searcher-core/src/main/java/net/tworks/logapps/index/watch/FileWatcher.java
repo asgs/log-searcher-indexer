@@ -3,8 +3,6 @@
  */
 package net.tworks.logapps.index.watch;
 
-import java.util.Observer;
-
 /**
  * @author asgs
  * 
@@ -40,7 +38,7 @@ public interface FileWatcher {
 	 *            Observer who is interested in certain events the File Watcher
 	 *            may generate.
 	 */
-	void registerObserver(Observer observer);
+	// void registerObserver(Observer observer);
 
 	/**
 	 * A signal to close down all its work and release all the resources it has

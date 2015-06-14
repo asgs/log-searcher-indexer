@@ -44,6 +44,10 @@ public class DatabaseSourceWatchEnabler {
 
 		List<String> sources = jdbcTemplate.queryForList(SQL_TO_GET_SOURCES,
 				String.class);
+		if (sources.isEmpty()) {
+			logger.info("No sources available in Database for File watch.");
+			return;
+		}
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
 		Runnable runnable = new Runnable() {
 

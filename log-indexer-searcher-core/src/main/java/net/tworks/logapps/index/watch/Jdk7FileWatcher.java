@@ -14,15 +14,13 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import net.tworks.logapps.common.model.SourceDTO;
 import net.tworks.logapps.index.persist.LogDataPersister;
 
 import org.apache.commons.io.IOUtils;
@@ -41,9 +39,11 @@ import com.sun.nio.file.SensitivityWatchEventModifier;
  *
  */
 @Component
-public class Jdk7FileWatcher extends Observable implements FileWatcher {
+public class Jdk7FileWatcher implements FileWatcher {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+
+	private final AtomicInteger atomicInteger = new AtomicInteger();
 
 	private WatchService watchService;
 
@@ -69,9 +69,11 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 				}
 			});
 			threadShouldRun = true;
+			thread.setName("FileWatcherDaemonThread-"
+					+ atomicInteger.incrementAndGet());
 			thread.start();
 			logger.info("WatchService background daemon spawned off.");
-			registerObserver(logDataPersister);
+			// registerObserver(logDataPersister);
 		} catch (IOException e) {
 			logger.error("Exception creating WatchService {}.", e);
 		}
@@ -105,7 +107,7 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 					SensitivityWatchEventModifier.HIGH);
 			filePositionMap.put(fileName, 0L);
 			logger.info(
-					"Successfully registered directory {} to the WatchService {}.",
+					"Successfully registered directory {} to the WatchService.",
 					directory);
 		} catch (IOException e) {
 			logger.error("Exception registering directory {}; cause is {}.",
@@ -115,20 +117,29 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 
 	private void pollFileChanges() {
 		while (threadShouldRun) {
-			WatchKey watchKey;
+			WatchKey watchKey = null;
 			try {
+				logger.info("Polling for watchService events.");
 				watchKey = watchService.take();
 				List<WatchEvent<?>> pollEvents = watchKey.pollEvents();
 				for (@SuppressWarnings("rawtypes")
 				WatchEvent watchEvent : pollEvents) {
 					Path path = (Path) watchEvent.context();
-					String string = path.toString();
+					String fileName = path.toString();
 					logger.info(
 							"Received watch notification for {}. WatchEvent kind is {}",
-							string, watchEvent.kind().name());
+							fileName, watchEvent.kind().name());
 					Set<String> keySet = filePositionMap.keySet();
-					for (String fileName : keySet) {
-						readNewContent(fileName);
+					for (String fullFileName : keySet) {
+						logger.info("File name from filePositionMap is {}.",
+								fullFileName);
+						if (fullFileName.endsWith(fileName)) {
+							logger.info("Going to read new content from {}.",
+									fullFileName);
+							readNewContent(fullFileName);
+							break;
+						}
+
 					}
 
 				}
@@ -137,10 +148,17 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 				logger.error(
 						"Exception retrieving watchKey from WatchService. cause is {}.",
 						e);
+				if (watchKey != null) {
+					watchKey.reset();
+				}
 			} catch (Exception exception) {
 				logger.error(
 						"Exception polling changes. Continuing to poll though. Cause is {}.",
 						exception);
+				if (watchKey != null) {
+					logger.info("Resetting the watchKey.");
+					watchKey.reset();
+				}
 			}
 
 		}
@@ -155,9 +173,10 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 			logger.info(fileContents);
 			// This should ideally be delegated to the parser to split the
 			// messages and persist to the data store.
-			setChanged();
-			SourceDTO sourceDTO = new SourceDTO(fileName, fileContents);
-			notifyObservers(sourceDTO);
+			// setChanged();
+			// SourceDTO sourceDTO = new SourceDTO(fileName, fileContents);
+			// notifyObservers(sourceDTO);
+			logDataPersister.persistLogData(fileName, fileContents);
 		} catch (IOException e) {
 			logger.error("Exception reading file {}; cause is {}.", fileName, e);
 		}
@@ -171,17 +190,18 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 			byteLocation += byteArray.length;
 			filePositionMap.put(fileName, byteLocation);
 			String fileContents = new String(byteArray, "UTF-8");
-			// The separator should be configurable based on the Platform.
 			if (logger.isDebugEnabled()) {
+				// The separator should be configurable based on the Platform.
 				String[] lines = fileContents.split("\n");
 				logger.info("New content below.");
 				for (String line : lines) {
 					logger.debug(line);
 				}
 			}
-			setChanged();
-			SourceDTO sourceDTO = new SourceDTO(fileName, fileContents);
-			notifyObservers(sourceDTO);
+			// setChanged();
+			// SourceDTO sourceDTO = new SourceDTO(fileName, fileContents);
+			// notifyObservers(sourceDTO);
+			logDataPersister.persistLogData(fileName, fileContents);
 
 		} catch (IOException e) {
 			logger.error("Exception reading file {}; cause is {}.", fileName, e);
@@ -194,11 +214,11 @@ public class Jdk7FileWatcher extends Observable implements FileWatcher {
 		readFile(fullyQualifiedFileName);
 	}
 
-	public void registerObserver(Observer observer) {
-		logger.info("Registering observer {}.", observer);
-		addObserver(observer);
-		logger.info("Registered observer {}.", observer);
-	}
+	/*
+	 * public void registerObserver(Observer observer) {
+	 * logger.info("Registering observer {}.", observer); addObserver(observer);
+	 * logger.info("Registered observer {}.", observer); }
+	 */
 
 	@Override
 	@PreDestroy

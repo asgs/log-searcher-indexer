@@ -37,7 +37,7 @@ public class FileWatcherStartupInitializer implements ServletContextListener {
 		 */
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
 		fileWatcher.initialize();
-		fileWatcher.registerObserver(logDataPersister);
+		//fileWatcher.registerObserver(logDataPersister);
 	}
 
 	@Override

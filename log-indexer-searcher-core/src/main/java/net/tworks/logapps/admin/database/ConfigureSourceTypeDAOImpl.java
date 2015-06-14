@@ -114,7 +114,8 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 		return true;
 	}
 
-	private boolean configureIndexMapping(JdbcTemplate jdbcTemplate,
+	@Transactional
+	public boolean configureIndexMapping(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
 		return jdbcTemplate.execute(sqlForIndexMapping, (
 				PreparedStatement preparedStatement) -> {
@@ -137,7 +138,8 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 
 	}
 
-	private boolean configureSourceMapping(JdbcTemplate jdbcTemplate,
+	@Transactional
+	public boolean configureSourceMapping(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
 
 		return jdbcTemplate.execute(sqlForSourceMapping, (
@@ -159,7 +161,8 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 		});
 	}
 
-	private boolean configureSourceMetadata(JdbcTemplate jdbcTemplate,
+	@Transactional
+	public boolean configureSourceMetadata(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
 
 		return jdbcTemplate.execute(sqlForSourceMetadata, (

@@ -22,7 +22,6 @@ import net.tworks.logapps.admin.parser.LogPatternLayoutParser;
 import net.tworks.logapps.common.database.DataSourceManager;
 import net.tworks.logapps.common.model.SourceDTO;
 import net.tworks.logapps.index.metadata.StructuredEventMetaDataEnumerator;
-import net.tworks.logapps.index.watch.FileWatcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +43,6 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 
 	@Autowired
 	private DataSourceManager dataSourceManager;
-
-	@Autowired
-	private FileWatcher fileWatcher;
 
 	@Autowired
 	private StructuredEventMetaDataEnumerator structuredEventMetaDataEnumerator;
@@ -71,8 +67,8 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 	@Override
 	@Transactional
 	public void persistLogData(String source, String logContents) {
-		// 1. Retrieve the pattern_layout from the table source_metadata for the
-		// given source.
+		// 1. Retrieve the pattern_layout and source from the table
+		// source_metadata for the given source.
 
 		String[] sourceMetadata = jdbcTemplate.queryForObject(
 				sqlForGettingSourcePatternLayout, new String[] { source }, (
@@ -99,11 +95,46 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 		logger.info("TimeStampFormat is {}.", timeStampFormat);
 		String[] lines = logContents.split("\n");
 		for (String line : lines) {
+			// Skip stack traces for now.
+			if (StringUtils.isEmpty(line) || line.startsWith("\t")) {
+				logger.info("Received an empty line. Skipping and moving on to the next.");
+				continue;
+			}
+			// Escaping is required in Oracle.
+			line = line.replace("'", "''");
+			logger.info("Current log line is {}.", line);
 			String[] tokens = line.split(" ");
 			if (indexOfTimeStampField != -1) {
-				String timeStampValue = tokens[indexOfTimeStampField];
+				String timeStampValue = "";
+				String[] splits = timeStampFormat.split(" ");
+				if (splits.length > 1) {
+					int noOfWords = splits.length;
+					for (int counter = 0; counter < noOfWords; counter++) {
+						logger.info(
+								"Token size is {}. indexOfTimeStampField is {}. noOfWords is {}. counter is {}.",
+								tokens.length, indexOfTimeStampField,
+								noOfWords, counter);
+						if (!timeStampValue.equals("")) {
+							timeStampValue = timeStampValue + " "
+									+ tokens[indexOfTimeStampField + counter];
+						} else {
+							timeStampValue = timeStampValue
+									+ tokens[indexOfTimeStampField + counter];
+
+						}
+
+					}
+
+				} else {
+					timeStampValue = tokens[indexOfTimeStampField];
+				}
 				timeStampValue = timeStampValue.replaceAll("\\[", "");
-				timeStampValue = timeStampValue + " +0530";
+				// TODO - fix this hack.
+				if (timeStampFormat.contains("z")
+						|| timeStampFormat.contains("Z")
+						|| timeStampFormat.contains("XXX")) {
+					timeStampValue = timeStampValue + " +0530";
+				}
 				logger.info("Timestamp from logs is {}.", timeStampValue);
 				SimpleDateFormat dateFormat = new SimpleDateFormat(
 						timeStampFormat);
@@ -146,6 +177,7 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 					logger.error(
 							"Error inserting log content to raw_event table. cause is {}.",
 							e);
+					return;
 				}
 
 				String logMessage = parseLogMessage(line, sourcePatternLayout);
@@ -158,37 +190,44 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 				StringBuilder valueBuilder = new StringBuilder(" values('");
 				valueBuilder.append(logMessage);
 				valueBuilder.append("',");
-				logger.info("Before tokenization.");
-				logger.info("builder is {}.", builder.toString());
-				logger.info("valueBuilder is {}.", valueBuilder.toString());
+				String threadName = parseThreadName(line, sourcePatternLayout);
+				if (threadName != null) {
+					builder.append("thread_name,");
+					valueBuilder.append("'");
+					valueBuilder.append(threadName);
+					valueBuilder.append("',");
+				}
+
+				String logLevel = parseLogLevel(line, sourcePatternLayout);
+				if (logLevel != null) {
+					builder.append("log_level,");
+					valueBuilder.append("'");
+					valueBuilder.append(logLevel);
+					valueBuilder.append("',");
+				}
+
 				if (!tokenMap.isEmpty()) {
 					for (Entry<String, String> entry : tokenMap.entrySet()) {
 						builder.append(entry.getKey());
 						builder.append(",");
 						valueBuilder.append(entry.getValue());
-						valueBuilder.append(",");
+						valueBuilder.append("',");
 					}
 				} else {
 					logger.info("tokenMap is empty.");
 				}
-				logger.info("Before tokenization.");
-				logger.info("builder is {}.", builder.toString());
-				logger.info("valueBuilder is {}.", valueBuilder.toString());
 				builder.deleteCharAt(builder.length() - 1);
 				valueBuilder.deleteCharAt(valueBuilder.length() - 1);
-				logger.info("After last char deletion.");
-				logger.info("builder is {}.", builder.toString());
-				logger.info("valueBuilder is {}.", valueBuilder.toString());
 				builder.append(")");
 				valueBuilder.append(")");
-				logger.info("Before concatenation.");
-				logger.info("builder is {}.", builder.toString());
-				logger.info("valueBuilder is {}.", valueBuilder.toString());
 				String finalQuery = builder.toString()
 						+ valueBuilder.toString();
 				logger.info("Insert query for structured_event is {}.",
 						finalQuery);
 				jdbcTemplate.update(finalQuery);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Successfully copied log line to structured_event table.");
+				}
 
 			} else {
 				logger.info("Received an empty line. Discarding it.");
@@ -196,6 +235,65 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 
 		}
 
+	}
+
+	/**
+	 * Parses the Log level of a given log line based on its pattern layout.
+	 * 
+	 * @return Log Level of the statement
+	 */
+	private String parseLogLevel(String logLine, String patternLayout) {
+		if (!patternLayout.contains("%level")) {
+			return null;
+		}
+
+		String[] tokens = patternLayout.split(" ");
+		int counter = 0;
+		for (String token : tokens) {
+			counter++;
+			if (token.contains("%level")) {
+				break;
+			}
+		}
+		tokens = logLine.split(" ");
+		int indexOfLogMessage = counter - 1;
+		String logMessage = tokens[indexOfLogMessage];
+		logger.info("Log level is {}.", logMessage);
+		return logMessage;
+	}
+
+	/**
+	 * Parses the Log level of a given log line based on its pattern layout.
+	 * 
+	 * @return Log Level of the statement
+	 */
+	private String parseThreadName(String logLine, String patternLayout) {
+
+		if (!patternLayout.contains("%thread")) {
+			return null;
+		}
+
+		/*
+		 * String patternLayout =
+		 * "%date{dd-MMM-yyyy HH:mm:ss.SSS} %level [%thread] %logger %msg%n";
+		 * String logLine =
+		 * "14-Jun-2015 01:46:49.258 INFO [localhost-startStop-2] org.apache.catalina.core.ApplicationContext.log ContextListener: contextDestroyed()"
+		 * ;
+		 */
+
+		String[] tokens = patternLayout.split(" ");
+		int counter = 0;
+		for (String token : tokens) {
+			counter++;
+			if (token.contains("%thread")) {
+				break;
+			}
+		}
+		tokens = logLine.split(" ");
+		int indexOfThreadName = counter - 1;
+		String threadName = tokens[indexOfThreadName];
+		logger.info("Thread name is {}.", threadName);
+		return threadName;
 	}
 
 	private String parseLogMessage(String logLine, String patternLayout) {
@@ -218,7 +316,7 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 		int indexOfLogMessage = counter - 1;
 		int indexInLogLine = logLine.indexOf(tokens[indexOfLogMessage]);
 		String logMessage = logLine.substring(indexInLogLine);
-		logger.info("logMessage is " + logMessage);
+		logger.info("logMessage is {}.", logMessage);
 		return logMessage;
 	}
 
@@ -234,7 +332,7 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 				int indexOfSpace = temp.indexOf(' ');
 				tokens[counter] = logLine
 						.substring(index, index + indexOfSpace);
-				logger.info("Retrieved token " + tokens[counter]);
+				logger.info("Retrieved token {}.", tokens[counter]);
 				String[] splits = tokens[counter].split(" ");
 				tokenMap.put(splits[0], splits[1]);
 			}
@@ -255,6 +353,8 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 		 * "127.0.0.1 - - [13/Jun/2015:21:16:29 +0530] guid=ssdsd-dsds userId=someName-blah \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 146"
 		 * );
 		 */
+
+		/* new BasicLogDataPersister().parseThreadName(); */
 	}
 
 	@Override
