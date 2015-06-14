@@ -54,7 +54,11 @@ public class SearchQueryParser {
 			String timeUnit) {
 		this.fullQuery = fullQuery;
 		this.timeDuration = timeDuration;
-		this.timeUnit = ChronoUnit.valueOf(timeUnit);
+		if (timeUnit == null) {
+			this.timeUnit = null;
+		} else {
+			this.timeUnit = ChronoUnit.valueOf(timeUnit);
+		}
 
 	}
 
@@ -113,9 +117,8 @@ public class SearchQueryParser {
 	}
 
 	public Map<String, String> parseKeyValues() {
-		Matcher matcher = REGEX_PATTERN_KEY_VALUE.matcher(fullQuery);
-		System.out.println(matcher.groupCount());
 		Map<String, String> map = new LinkedHashMap<String, String>();
+		Matcher matcher = REGEX_PATTERN_KEY_VALUE.matcher(fullQuery);
 		logger.info("Key value pairs parsed from the query below.");
 		while (matcher.find()) {
 			logger.info("{}={}.", matcher.group(1), matcher.group(2));
@@ -126,18 +129,21 @@ public class SearchQueryParser {
 	}
 
 	public String getUnmatchedString() {
-		StringBuilder builder = new StringBuilder(fullQuery);
-		for (String string : keyValueList) {
-			int indexOf = builder.indexOf(string);
-			builder = builder.delete(indexOf, indexOf + string.length());
-		}
-		String string = builder.toString();
-		if (string != null) {
-			return builder.toString().trim();
+		if (keyValueList.isEmpty()) {
+			return fullQuery;
 		} else {
-			return string;
+			StringBuilder builder = new StringBuilder(fullQuery);
+			for (String string : keyValueList) {
+				int indexOf = builder.indexOf(string);
+				builder = builder.delete(indexOf, indexOf + string.length());
+			}
+			String string = builder.toString();
+			if (string != null) {
+				return builder.toString().trim();
+			} else {
+				return string;
+			}
 		}
-
 	}
 
 	public static void main(String[] args) {

@@ -3,34 +3,81 @@
  */
 package net.tworks.logapps.search;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import net.tworks.logapps.common.model.SearchKeyValue;
 import net.tworks.logapps.rest.model.SearchQuery;
+import net.tworks.logapps.search.dao.LogSearchDAO;
 
 /**
  * @author asgs
  * 
- *         The facade for querying anything from the database.
+ *         The facade for querying logs from the database with the various
+ *         combinations available, without letting the client or the Controller
+ *         layer know about the complexity involved in accomplishing it.
  */
+@Component
 public class QuerySearchFacade {
 
-	private String[] getSearchResults(String searchString) {
-		return null;
-	}
+	@Autowired
+	private LogSearchDAO logSearchDAO;
 
-	private String[] getSearchResultsWithFieldElements(String searchString,
-			String... fields) {
-		return null;
-	}
+	public String[] retrieveSearchResults(SearchQuery searchQuery) {
 
-	public String[] retrieveSearchResults(
-			SearchQuery searchQuery) {
-		/*if (searchQuery.getTokenPairs() != null) {
-			return getSearchResultsWithFieldElements(
-					searchQuery.getSearchString(),
-					searchQuery.getTokenPairs());
+		if (searchQuery.getTimeDuration() == 0) {
+			if (searchQuery.getKeyValues().isEmpty()) {
+				// No key value pairs available.
+				return logSearchDAO
+						.searchByRawQuery(searchQuery.getFullQuery());
+			} else {
+				return logSearchDAO.searchByKeysWithRawQuery(
+						extractSearcKeyValues(searchQuery),
+						searchQuery.getMainQuery());
+			}
 		} else {
-			return getSearchResults(searchQuery.getSearchString());
-		}*/
-		return null;
+			if (searchQuery.getKeyValues().isEmpty()) {
+				// No key value pairs available.
+				return logSearchDAO.searchByRawQueryForAGivenTimeFrame(
+						searchQuery.getFullQuery(),
+						searchQuery.getTimeDuration(),
+						searchQuery.getTimeUnit());
+			} else {
+				return logSearchDAO.searchByKeysWithRawQueryForAGivenTimeFrame(
+						extractSearcKeyValues(searchQuery),
+						searchQuery.getMainQuery(),
+						searchQuery.getTimeDuration(),
+						searchQuery.getTimeUnit());
+			}
+		}
+	}
+
+	/**
+	 * A trivial method to convert the Model with Rest layer to the one with DAO
+	 * layer.
+	 * 
+	 * @param searchQuery
+	 * @return Array of {@link SearchKeyValue}
+	 */
+	private SearchKeyValue[] extractSearcKeyValues(SearchQuery searchQuery) {
+		List<String> keyValues = searchQuery.getKeyValues();
+		if (keyValues.isEmpty()) {
+			return null;
+		} else {
+			SearchKeyValue[] searchKeyValues = new SearchKeyValue[keyValues
+					.size()];
+			int index = 0;
+			for (String string : keyValues) {
+				String[] splits = string.split("=");
+				SearchKeyValue searchKeyValue = new SearchKeyValue(splits[0],
+						splits[1]);
+				searchKeyValues[index] = searchKeyValue;
+				index++;
+			}
+			return searchKeyValues;
+		}
 	}
 
 }
