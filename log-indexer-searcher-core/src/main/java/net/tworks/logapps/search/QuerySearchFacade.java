@@ -3,7 +3,7 @@
  */
 package net.tworks.logapps.search;
 
-import net.tworks.logapps.common.model.SearchInputCriteria;
+import net.tworks.logapps.rest.model.SearchQuery;
 
 /**
  * @author asgs
@@ -22,14 +22,15 @@ public class QuerySearchFacade {
 	}
 
 	public String[] retrieveSearchResults(
-			SearchInputCriteria searchInputCriteria) {
-		if (searchInputCriteria.getTokenPairs() != null) {
+			SearchQuery searchQuery) {
+		/*if (searchQuery.getTokenPairs() != null) {
 			return getSearchResultsWithFieldElements(
-					searchInputCriteria.getSearchString(),
-					searchInputCriteria.getTokenPairs());
+					searchQuery.getSearchString(),
+					searchQuery.getTokenPairs());
 		} else {
-			return getSearchResults(searchInputCriteria.getSearchString());
-		}
+			return getSearchResults(searchQuery.getSearchString());
+		}*/
+		return null;
 	}
 
 }

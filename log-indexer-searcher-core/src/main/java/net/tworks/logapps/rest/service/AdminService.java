@@ -11,6 +11,8 @@ import net.tworks.logapps.common.database.exception.DatabaseConfigurationExcepti
 import net.tworks.logapps.common.model.SourceTypeConfiguration;
 import net.tworks.logapps.rest.model.ConfigurationResult;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/admin")
 public class AdminService {
+
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private ConfigureSourceTypeDAO configureSourceTypeDAO;
@@ -63,11 +67,14 @@ public class AdminService {
 			configurationResult.setResult(true);
 			configurationResult
 					.setMessage("Successfully configured for indexing.");
+			logger.info("Successfully configured for indexing.");
 		} catch (DatabaseConfigurationException databaseConfigurationException) {
 			configurationResult.setResult(false);
 			configurationResult
 					.setMessage("Failed to configured for indexing. Reason is "
 							+ databaseConfigurationException.getMessage());
+			logger.error("Failed to configured for indexing. Reason is {}.",
+					databaseConfigurationException);
 		}
 		return configurationResult;
 	}
