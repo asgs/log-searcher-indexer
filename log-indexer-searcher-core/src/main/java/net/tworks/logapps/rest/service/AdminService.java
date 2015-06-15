@@ -70,10 +70,9 @@ public class AdminService {
 			logger.info("Successfully configured for indexing.");
 		} catch (DatabaseConfigurationException databaseConfigurationException) {
 			configurationResult.setResult(false);
-			configurationResult
-					.setMessage("Failed to configured for indexing. Reason is "
-							+ databaseConfigurationException.getMessage());
-			logger.error("Failed to configured for indexing. Reason is {}.",
+			configurationResult.setMessage("Failed! Reason is "
+					+ databaseConfigurationException.getMessage());
+			logger.error("Failed! Reason is {}.",
 					databaseConfigurationException);
 		}
 		return configurationResult;

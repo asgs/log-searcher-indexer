@@ -3,20 +3,7 @@
 <head>
 <script type="text/javascript" src="scripts/jquery-2.1.4.min.js"></script>
 <script type="text/javascript" src="scripts/search-script.js"></script>
-<script type="text/javascript">
-	$(document)
-			.ready(
-					function() {
-						$("#searchButton1")
-								.click(
-										function() {
-											alert("hi!");
-											var myData = ["127.0.0.1 - - [14/Jun/2015:19:50:40 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:50:40 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:50:40 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:50:40 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:45 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:55:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:55:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:55:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:55:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:55:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:55:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:55:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:20:00:49 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:20:00:49 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:20:00:49 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:20:00:49 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:20:00:50 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:20:00:49 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:50:40 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:50:40 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:50:40 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:50:40 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:50:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:50:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:45 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:45 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:45 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:52:46 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:55:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:55:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:19:55:41 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:20:00:49 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:20:00:50 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:20:00:50 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255","127.0.0.1 - - [14/Jun/2015:20:00:50 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 255"];
-											$.parseJSON(myData);
-										});
-					});
-</script>
-	<title>LogSearcher Indexer Application</title>
+<title>LogSearcher Indexer Application</title>
 </head>
 <body>
 	<nav>
@@ -25,9 +12,6 @@
 			<li><a href="admin.html">Administration</a></li>
 		</ul>
 	</nav>
-	<br />
-	<br />
-	<br />
 	<hr />
 	<h2 style="text-align: center">Search</h2>
 	<br />
@@ -39,6 +23,7 @@
 			<textarea rows="3" cols="100" id="searchQuery"
 				placeholder="Enter your search query here..."></textarea>
 			<select id="timeFrame">
+				<option value=""></option>
 				<option value="1 MINUTES">1 MINUTE</option>
 				<option value="5 MINUTES">5 MINUTES</option>
 				<option value="60 MINUTES">60 MINUTES</option>
