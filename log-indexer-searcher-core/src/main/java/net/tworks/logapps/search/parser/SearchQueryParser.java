@@ -76,6 +76,11 @@ public class SearchQueryParser {
 		searchQuery.setLogLevel(parseLogLevel(keyValues));
 		searchQuery.setMainQuery(getUnmatchedString());
 		searchQuery.setKeyValues(keyValueList);
+		// TODO - uncomment to enable time-based search.
+		/*
+		 * searchQuery.setTimeDuration(timeDuration);
+		 * searchQuery.setTimeUnit(timeUnit);
+		 */
 		logger.info("SearchQuery parsed and populated.");
 		return searchQuery;
 	}
@@ -119,11 +124,13 @@ public class SearchQueryParser {
 	public Map<String, String> parseKeyValues() {
 		Map<String, String> map = new LinkedHashMap<String, String>();
 		Matcher matcher = REGEX_PATTERN_KEY_VALUE.matcher(fullQuery);
-		logger.info("Key value pairs parsed from the query below.");
 		while (matcher.find()) {
 			logger.info("{}={}.", matcher.group(1), matcher.group(2));
 			keyValueList.add(matcher.group(1) + "=" + matcher.group(2));
 			map.put(matcher.group(1), matcher.group(2));
+		}
+		if (!map.isEmpty()) {
+			logger.info("Key value pairs parsed from the query below.");
 		}
 		return map;
 	}

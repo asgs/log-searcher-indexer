@@ -34,7 +34,7 @@ public interface LogSearchDAO {
 	 *            The full query minus key values.
 	 * @return Array of results.
 	 */
-	String[] searchByKeysWithRawQuery(SearchKeyValue[] keyValues,
+	String[] searchByKeysWithMainQuery(SearchKeyValue[] keyValues,
 			String mainQuery);
 
 	/**
@@ -66,7 +66,7 @@ public interface LogSearchDAO {
 	 *            The unit of the timeDuration field.
 	 * @return Array of results.
 	 */
-	String[] searchByKeysWithRawQueryForAGivenTimeFrame(
+	String[] searchByKeysWithMainQueryForAGivenTimeFrame(
 			SearchKeyValue[] keyValues, String mainQuery, long timeDuration,
 			ChronoUnit timeUnit);
 

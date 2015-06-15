@@ -5,7 +5,6 @@ package net.tworks.logapps.rest.service;
 
 import net.tworks.logapps.common.database.DataSourceManager;
 import net.tworks.logapps.rest.model.SearchQuery;
-import net.tworks.logapps.rest.model.SearchResults;
 import net.tworks.logapps.search.QuerySearchFacade;
 import net.tworks.logapps.search.parser.SearchQueryParser;
 
@@ -51,9 +50,6 @@ public class SearchService {
 			@RequestParam(required = false, value = "timeframe") Long time,
 			@RequestParam(required = false, value = "timeunit") String timeUnit) {
 
-		SearchResults results = new SearchResults();
-		String[] resultsArray = { "log line1", "log line2", "log line3" };
-		results.setResults(resultsArray);
 		if (time == null) {
 			time = 0L;
 		}

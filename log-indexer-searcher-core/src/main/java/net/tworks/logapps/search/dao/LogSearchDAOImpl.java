@@ -4,6 +4,7 @@
 package net.tworks.logapps.search.dao;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -19,8 +20,7 @@ import net.tworks.logapps.index.watch.FileWatcher;
 /**
  * @author asgs
  * 
- *         A unified interface to query for search results given various
- *         combinations the user has control over.
+ *         Implements the common search methods.
  *
  */
 @Component
@@ -34,9 +34,9 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 
 	private JdbcTemplate jdbcTemplate;
 
-	private final String sqlForSearchWithIndexOnly = "select raw_event_data from raw_event where raw_event_data like ? source_type IN (select source_type from index_mapping where search_index='?');";
+	private final String sqlForSearchWithIndexOnly = "select raw_event_data from raw_event where raw_event_data like ? source_type IN (select source_type from index_mapping where search_index = ?);";
 
-	private final String sqlForSearchWithSourceType = "select raw_event_data from raw_event where source_type = ? and where raw_event_data like ? ";
+	private final String sqlForSearchWithSourceType = "select raw_event_data from raw_event where source_type = ? and where raw_event_data like ?";
 
 	private final String sqlForRawSearch = "select raw_event_data from raw_event where raw_event_data like ?";
 
@@ -55,9 +55,36 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 	}
 
 	@Override
-	public String[] searchByKeysWithRawQuery(SearchKeyValue[] keyValues,
+	public String[] searchByKeysWithMainQuery(SearchKeyValue[] keyValues,
 			String mainQuery) {
-		return null;
+		List<SearchKeyValue> asList = Arrays.asList(keyValues);
+		List<String> queryForList = null;
+		boolean indexFound = false;
+		boolean sourceTypeFound = false;
+		String sourceType = null;
+		String searchIndex = null;
+		for (SearchKeyValue keyValue : asList) {
+			if (keyValue.getKey().equalsIgnoreCase("source_type")) {
+				sourceTypeFound = true;
+				sourceType = keyValue.getValue();
+				break;
+			} else if (keyValue.getKey().equalsIgnoreCase("source_type")) {
+				indexFound = true;
+				searchIndex = keyValue.getValue();
+			}
+		}
+
+		if (sourceTypeFound) {
+			queryForList = jdbcTemplate.queryForList(
+					sqlForSearchWithSourceType, new Object[] { sourceType,
+							"%" + mainQuery + "%" }, String.class);
+		} else if (indexFound) {
+			queryForList = jdbcTemplate.queryForList(sqlForSearchWithIndexOnly,
+					new Object[] { "%" + mainQuery + "%", searchIndex },
+					String.class);
+		}
+
+		return queryForList.toArray(new String[queryForList.size()]);
 	}
 
 	@Override
@@ -67,7 +94,7 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 	}
 
 	@Override
-	public String[] searchByKeysWithRawQueryForAGivenTimeFrame(
+	public String[] searchByKeysWithMainQueryForAGivenTimeFrame(
 			SearchKeyValue[] keyValues, String mainQuery, long timeDuration,
 			ChronoUnit timeUnit) {
 		return null;

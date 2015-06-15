@@ -33,7 +33,7 @@ public class QuerySearchFacade {
 				return logSearchDAO
 						.searchByRawQuery(searchQuery.getFullQuery());
 			} else {
-				return logSearchDAO.searchByKeysWithRawQuery(
+				return logSearchDAO.searchByKeysWithMainQuery(
 						extractSearcKeyValues(searchQuery),
 						searchQuery.getMainQuery());
 			}
@@ -45,7 +45,7 @@ public class QuerySearchFacade {
 						searchQuery.getTimeDuration(),
 						searchQuery.getTimeUnit());
 			} else {
-				return logSearchDAO.searchByKeysWithRawQueryForAGivenTimeFrame(
+				return logSearchDAO.searchByKeysWithMainQueryForAGivenTimeFrame(
 						extractSearcKeyValues(searchQuery),
 						searchQuery.getMainQuery(),
 						searchQuery.getTimeDuration(),

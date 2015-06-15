@@ -192,7 +192,7 @@ public class Jdk7FileWatcher implements FileWatcher {
 			String fileContents = new String(byteArray, "UTF-8");
 			if (logger.isDebugEnabled()) {
 				// The separator should be configurable based on the Platform.
-				String[] lines = fileContents.split("\n");
+				String[] lines = fileContents.split("\r\n");
 				logger.info("New content below.");
 				for (String line : lines) {
 					logger.debug(line);

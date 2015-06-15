@@ -93,7 +93,7 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 		String oracleTimeStampValue = null;
 		String timeStampFormat = logPatternLayoutParser.parseTimeStampFormat();
 		logger.info("TimeStampFormat is {}.", timeStampFormat);
-		String[] lines = logContents.split("\n");
+		String[] lines = logContents.split("\r\n");
 		for (String line : lines) {
 			// Skip stack traces for now.
 			if (StringUtils.isEmpty(line) || line.startsWith("\t")) {
