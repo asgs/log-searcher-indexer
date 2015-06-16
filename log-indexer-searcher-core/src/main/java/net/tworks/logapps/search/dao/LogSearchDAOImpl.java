@@ -57,17 +57,17 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 
 	private final String sqlForSearchWithTimeAndSourceType = "select raw_event_data from raw_event where upper(raw_event_data) like ? and event_timestamp > ? and upper(source_type) = ?";
 
-	private final String sqlForSearchWithSourceTypeAndOtherKeys = "select raw_event_data from raw_event where upper(source_type) = ? and event_id IN (select event_id from structured_event where upper(message_content) like ?";
+	private final String sqlForSearchWithSourceTypeAndOtherKeys = "select raw_event_data from raw_event where upper(raw_event_data) like ? and upper(source_type) = ? and event_id IN (select event_id from structured_event where";
 
-	private final String sqlForSearchWithIndexAndOtherKeys = "select raw_event_data from raw_event where upper(source_type) IN (select upper(source_type) from index_mapping where upper(search_index) = ?) and event_id IN (select event_id from structured_event where upper(message_content) like ?";
+	private final String sqlForSearchWithIndexAndOtherKeys = "select raw_event_data from raw_event where upper(raw_event_data) like ? and upper(source_type) IN (select upper(source_type) from index_mapping where upper(search_index) = ?) and event_id IN (select event_id from structured_event where";
 
-	private final String sqlForSearchWithOnlyOtherKeys = "select raw_event_data from raw_event where event_id IN (select event_id from structured_event where upper(message_content) like ?";
+	private final String sqlForSearchWithOnlyOtherKeys = "select raw_event_data from raw_event where upper(raw_event_data) like ? and event_id IN (select event_id from structured_event where";
 
-	private final String sqlForSearchWithTimeSourceTypeAndOtherKeys = "select raw_event_data from raw_event where event_timestamp > ? and upper(source_type) = ? and event_id IN (select event_id from structured_event where upper(message_content) like ?";
+	private final String sqlForSearchWithTimeSourceTypeAndOtherKeys = "select raw_event_data from raw_event where upper(raw_event_data) like ? and event_timestamp > ? and upper(source_type) = ? and event_id IN (select event_id from structured_event where";
 
-	private final String sqlForSearchWithTimeIndexAndOtherKeys = "select raw_event_data from raw_event where event_timestamp > ? and upper(source_type) IN (select upper(source_type) from index_mapping where upper(search_index) = ?) and event_id IN (select event_id from structured_event where upper(message_content) like ?";
+	private final String sqlForSearchWithTimeIndexAndOtherKeys = "select raw_event_data from raw_event where upper(raw_event_data) like ? and event_timestamp > ? and upper(source_type) IN (select upper(source_type) from index_mapping where upper(search_index) = ?) and event_id IN (select event_id from structured_event where";
 
-	private final String sqlForSearchWithTimeOnlyOtherKeys = "select raw_event_data from raw_event where event_timestamp > ? and event_id IN (select event_id from structured_event where upper(message_content) like ?";
+	private final String sqlForSearchWithTimeOnlyOtherKeys = "select raw_event_data from raw_event where upper(raw_event_data) like ? and event_timestamp > ? and event_id IN (select event_id from structured_event where";
 
 	@PostConstruct
 	public void setJdbcTemplate() {
@@ -166,6 +166,7 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 		}
 		List<SearchKeyValue> kvList = Arrays.asList(keyValues);
 		List<Object> objectList = new ArrayList<Object>();
+		objectList.add(mainQuery.toUpperCase());
 
 		String finalQuery = sqlForSearchWithSourceTypeAndOtherKeys;
 		for (SearchKeyValue keyValue : kvList) {
@@ -176,16 +177,18 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 				break;
 			}
 		}
-		objectList.add(mainQuery.toUpperCase());
 
 		for (SearchKeyValue keyValue : kvList) {
 			if (keyValue.getKey().equalsIgnoreCase("log_level")) {
-				finalQuery += " and upper(log_level) like ?";
+				finalQuery += " upper(log_level) like ?";
 				String logLevel = keyValue.getValue();
 				String uppedLogLevel = logLevel.toUpperCase();
 				objectList.add("%" + uppedLogLevel + "%");
 			} else if (keyValue.getKey().equalsIgnoreCase("thread_name")) {
-				finalQuery += " and upper(thread_name) like ?";
+				if (!finalQuery.endsWith("where")) {
+					finalQuery += " and";
+				}
+				finalQuery += " upper(thread_name) like ?";
 				String threadName = keyValue.getValue();
 				String uppedThreadName = threadName.toUpperCase();
 				objectList.add("%" + uppedThreadName + "%");
@@ -206,6 +209,8 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 		}
 		List<SearchKeyValue> kvList = Arrays.asList(keyValues);
 		List<Object> objectList = new ArrayList<Object>();
+		objectList.add(mainQuery.toUpperCase());
+
 		String finalQuery = sqlForSearchWithIndexAndOtherKeys;
 		for (SearchKeyValue keyValue : kvList) {
 			if (keyValue.getKey().equalsIgnoreCase("index")) {
@@ -216,16 +221,17 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 			}
 		}
 
-		objectList.add(mainQuery.toUpperCase());
-
 		for (SearchKeyValue keyValue : kvList) {
 			if (keyValue.getKey().equalsIgnoreCase("log_level")) {
-				finalQuery += " and upper(log_level) like ?";
+				finalQuery += " upper(log_level) like ?";
 				String logLevel = keyValue.getValue();
 				String uppedLogLevel = logLevel.toUpperCase();
 				objectList.add("%" + uppedLogLevel + "%");
 			} else if (keyValue.getKey().equalsIgnoreCase("thread_name")) {
-				finalQuery += " and upper(thread_name) like ?";
+				if (!finalQuery.endsWith("where")) {
+					finalQuery += " and";
+				}
+				finalQuery += " upper(thread_name) like ?";
 				String threadName = keyValue.getValue();
 				String uppedThreadName = threadName.toUpperCase();
 				objectList.add("%" + uppedThreadName + "%");
@@ -251,12 +257,15 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 		String finalQuery = sqlForSearchWithOnlyOtherKeys;
 		for (SearchKeyValue keyValue : kvList) {
 			if (keyValue.getKey().equalsIgnoreCase("log_level")) {
-				finalQuery += " and upper(log_level) like ?";
+				finalQuery += " upper(log_level) like ?";
 				String logLevel = keyValue.getValue();
 				String uppedLogLevel = logLevel.toUpperCase();
 				objectList.add("%" + uppedLogLevel + "%");
 			} else if (keyValue.getKey().equalsIgnoreCase("thread_name")) {
-				finalQuery += " and upper(thread_name) like ?";
+				if (!finalQuery.endsWith("where")) {
+					finalQuery += " and";
+				}
+				finalQuery += " upper(thread_name) like ?";
 				String threadName = keyValue.getValue();
 				String uppedThreadName = threadName.toUpperCase();
 				objectList.add("%" + uppedThreadName + "%");
@@ -379,6 +388,7 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 		}
 		List<SearchKeyValue> kvList = Arrays.asList(keyValues);
 		List<Object> objectList = new ArrayList<Object>();
+		objectList.add(mainQuery.toUpperCase());
 		objectList.add(oracleTimeStampValue);
 		String finalQuery = sqlForSearchWithTimeSourceTypeAndOtherKeys;
 		for (SearchKeyValue keyValue : kvList) {
@@ -389,16 +399,18 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 				break;
 			}
 		}
-		objectList.add(mainQuery.toUpperCase());
 
 		for (SearchKeyValue keyValue : kvList) {
 			if (keyValue.getKey().equalsIgnoreCase("log_level")) {
-				finalQuery += " and upper(log_level) like ?";
+				finalQuery += " upper(log_level) like ?";
 				String logLevel = keyValue.getValue();
 				String uppedLogLevel = logLevel.toUpperCase();
 				objectList.add("%" + uppedLogLevel + "%");
 			} else if (keyValue.getKey().equalsIgnoreCase("thread_name")) {
-				finalQuery += " and upper(thread_name) like ?";
+				if (!finalQuery.endsWith("where")) {
+					finalQuery += " and";
+				}
+				finalQuery += " upper(thread_name) like ?";
 				String threadName = keyValue.getValue();
 				String uppedThreadName = threadName.toUpperCase();
 				objectList.add("%" + uppedThreadName + "%");
@@ -420,6 +432,7 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 		}
 		List<SearchKeyValue> kvList = Arrays.asList(keyValues);
 		List<Object> objectList = new ArrayList<Object>();
+		objectList.add(mainQuery.toUpperCase());
 
 		objectList.add(oracleTimeStampValue);
 		String finalQuery = sqlForSearchWithTimeIndexAndOtherKeys;
@@ -432,16 +445,17 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 			}
 		}
 
-		objectList.add(mainQuery.toUpperCase());
-
 		for (SearchKeyValue keyValue : kvList) {
 			if (keyValue.getKey().equalsIgnoreCase("log_level")) {
-				finalQuery += " and upper(log_level) like ?";
+				finalQuery += " upper(log_level) like ?";
 				String logLevel = keyValue.getValue();
 				String uppedLogLevel = logLevel.toUpperCase();
 				objectList.add("%" + uppedLogLevel + "%");
 			} else if (keyValue.getKey().equalsIgnoreCase("thread_name")) {
-				finalQuery += " and upper(thread_name) like ?";
+				if (!finalQuery.endsWith("where")) {
+					finalQuery += " and";
+				}
+				finalQuery += " upper(thread_name) like ?";
 				String threadName = keyValue.getValue();
 				String uppedThreadName = threadName.toUpperCase();
 				objectList.add("%" + uppedThreadName + "%");
@@ -464,17 +478,20 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 		}
 		List<SearchKeyValue> kvList = Arrays.asList(keyValues);
 		List<Object> objectList = new ArrayList<Object>();
-		objectList.add(oracleTimeStampValue);
 		objectList.add("%" + mainQuery.toUpperCase() + "%");
+		objectList.add(oracleTimeStampValue);
 		String finalQuery = sqlForSearchWithTimeOnlyOtherKeys;
 		for (SearchKeyValue keyValue : kvList) {
 			if (keyValue.getKey().equalsIgnoreCase("log_level")) {
-				finalQuery += " and upper(log_level) like ?";
+				finalQuery += " upper(log_level) like ?";
 				String logLevel = keyValue.getValue();
 				String uppedLogLevel = logLevel.toUpperCase();
 				objectList.add("%" + uppedLogLevel + "%");
 			} else if (keyValue.getKey().equalsIgnoreCase("thread_name")) {
-				finalQuery += " and upper(thread_name) like ?";
+				if (!finalQuery.endsWith("where")) {
+					finalQuery += " and";
+				}
+				finalQuery += " upper(thread_name) like ?";
 				String threadName = keyValue.getValue();
 				String uppedThreadName = threadName.toUpperCase();
 				objectList.add("%" + uppedThreadName + "%");

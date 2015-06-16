@@ -3,6 +3,7 @@
  */
 package net.tworks.logapps.search;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,7 @@ public class QuerySearchFacade {
 	 */
 	private SearchKeyValue[] extractSearchKeyValues(SearchQuery searchQuery) {
 		List<String> keyValues = searchQuery.getKeyValues();
+		Collections.sort(keyValues);
 		if (keyValues.isEmpty()) {
 			return null;
 		} else {
