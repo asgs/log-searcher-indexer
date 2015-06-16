@@ -33,7 +33,7 @@ $(document)
 												+ "&sourceType=" + sourceType
 												+ "&sourceIndex=" + sourceIndex;
 
-										alert(configUrl);
+										//alert(configUrl);
 
 										$.ajax({
 											url : configUrl

@@ -83,6 +83,13 @@ public class SearchQueryParser {
 		return searchQuery;
 	}
 
+	/**
+	 * Returns the Search Index from the query.
+	 * 
+	 * @param keyValues
+	 *            The map of key-values parsed.
+	 * @return Search Index from the query.
+	 */
 	public String parseSearchIndex(Map<String, String> keyValues) {
 		for (Map.Entry<String, String> keyEntry : keyValues.entrySet()) {
 			if (keyEntry.getKey().equals("index")) {
@@ -92,6 +99,13 @@ public class SearchQueryParser {
 		return null;
 	}
 
+	/**
+	 * Returns the source type from the query.
+	 * 
+	 * @param keyValues
+	 *            The map of key-values parsed.
+	 * @return Source type from the query..
+	 */
 	public String parseSourceType(Map<String, String> keyValues) {
 		for (Map.Entry<String, String> keyEntry : keyValues.entrySet()) {
 			if (keyEntry.getKey().equals("source_type")) {
@@ -101,6 +115,13 @@ public class SearchQueryParser {
 		return null;
 	}
 
+	/**
+	 * Returns the thread name from the query.
+	 * 
+	 * @param keyValues
+	 *            The map of key-values parsed.
+	 * @return Thread name from the query.
+	 */
 	public String parseThreadName(Map<String, String> keyValues) {
 		for (Map.Entry<String, String> keyEntry : keyValues.entrySet()) {
 			if (keyEntry.getKey().equals("thread_name")) {
@@ -110,6 +131,13 @@ public class SearchQueryParser {
 		return null;
 	}
 
+	/**
+	 * Returns the log level of the statement.
+	 * 
+	 * @param keyValues
+	 *            The map of key-values parsed.
+	 * @return Log level of the statement to query.
+	 */
 	public String parseLogLevel(Map<String, String> keyValues) {
 		for (Map.Entry<String, String> keyEntry : keyValues.entrySet()) {
 			if (keyEntry.getKey().equals("log_level")) {
@@ -119,6 +147,13 @@ public class SearchQueryParser {
 		return null;
 	}
 
+	/**
+	 * Splits the given input query to = separated key-value pairs. It also
+	 * populates a list of key-value pairs which will be used later to pick out
+	 * the actual search query.
+	 * 
+	 * @return A Map of key values.
+	 */
 	public Map<String, String> parseKeyValues() {
 		Map<String, String> map = new LinkedHashMap<String, String>();
 		Matcher matcher = REGEX_PATTERN_KEY_VALUE.matcher(fullQuery);
@@ -133,6 +168,12 @@ public class SearchQueryParser {
 		return map;
 	}
 
+	/**
+	 * Subtracts the key-value pairs from the given raw query to separate the
+	 * stand-alone search query portion.
+	 * 
+	 * @return The main query user typed in.
+	 */
 	public String getUnmatchedString() {
 		if (keyValueList.isEmpty()) {
 			return fullQuery;

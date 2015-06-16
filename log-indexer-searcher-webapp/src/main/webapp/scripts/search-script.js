@@ -25,7 +25,7 @@ $(document)
 										}									
 										//alert("URL is " + searchUrl);
 										$("#searchResults").html("");
-										$("#searchResults").add("<div id=\"loading\">Loading...</div>");
+										$("#searchResults").html("<div id=\"loading\" style=\"color:blue;font-size:30px;text-align:center\"><br/><br/><br/><br/><p>Loading... Please Wait.</p></div>");
 										$.ajax({
 											url : searchUrl
 										}).done(function(data) {

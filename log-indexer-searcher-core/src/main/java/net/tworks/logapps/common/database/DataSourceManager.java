@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DataSourceManager {
-	private static DataSourceManager INSTANCE;
 	private static final String JNDI_NAME = "jdbc/searchdb";
 	private static JdbcTemplate jdbcTemplate;
 	/*
@@ -59,10 +58,6 @@ public class DataSourceManager {
 	 * JdbcTemplate(dataSource); logger.info("Created jdbcTemplate instance.");
 	 * }
 	 */
-
-	public static DataSourceManager getInstance() {
-		return INSTANCE;
-	}
 
 	public DataSource getDataSource() {
 		return dataSource;
