@@ -34,7 +34,7 @@ public class QuerySearchFacade {
 						.searchByRawQuery(searchQuery.getFullQuery());
 			} else {
 				return logSearchDAO.searchByKeysWithMainQuery(
-						extractSearcKeyValues(searchQuery),
+						extractSearchKeyValues(searchQuery),
 						searchQuery.getMainQuery());
 			}
 		} else {
@@ -45,11 +45,12 @@ public class QuerySearchFacade {
 						searchQuery.getTimeDuration(),
 						searchQuery.getTimeUnit());
 			} else {
-				return logSearchDAO.searchByKeysWithMainQueryForAGivenTimeFrame(
-						extractSearcKeyValues(searchQuery),
-						searchQuery.getMainQuery(),
-						searchQuery.getTimeDuration(),
-						searchQuery.getTimeUnit());
+				return logSearchDAO
+						.searchByKeysWithMainQueryForAGivenTimeFrame(
+								extractSearchKeyValues(searchQuery),
+								searchQuery.getMainQuery(),
+								searchQuery.getTimeDuration(),
+								searchQuery.getTimeUnit());
 			}
 		}
 	}
@@ -61,7 +62,7 @@ public class QuerySearchFacade {
 	 * @param searchQuery
 	 * @return Array of {@link SearchKeyValue}
 	 */
-	private SearchKeyValue[] extractSearcKeyValues(SearchQuery searchQuery) {
+	private SearchKeyValue[] extractSearchKeyValues(SearchQuery searchQuery) {
 		List<String> keyValues = searchQuery.getKeyValues();
 		if (keyValues.isEmpty()) {
 			return null;
@@ -71,9 +72,11 @@ public class QuerySearchFacade {
 			int index = 0;
 			for (String string : keyValues) {
 				String[] splits = string.split("=");
-				SearchKeyValue searchKeyValue = new SearchKeyValue(splits[0],
-						splits[1]);
-				searchKeyValues[index] = searchKeyValue;
+				if (splits.length == 2) {
+					SearchKeyValue searchKeyValue = new SearchKeyValue(
+							splits[0], splits[1]);
+					searchKeyValues[index] = searchKeyValue;
+				}
 				index++;
 			}
 			return searchKeyValues;

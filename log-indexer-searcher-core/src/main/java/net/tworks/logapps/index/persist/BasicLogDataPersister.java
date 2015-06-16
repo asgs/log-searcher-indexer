@@ -23,6 +23,8 @@ import net.tworks.logapps.common.database.DataSourceManager;
 import net.tworks.logapps.common.model.SourceDTO;
 import net.tworks.logapps.index.metadata.StructuredEventMetaDataEnumerator;
 
+import static net.tworks.logapps.common.util.Constants.ORACLE_TIMESTAMP_FORMAT;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +53,8 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 
 	private JdbcTemplate jdbcTemplate;
 
-	private static final String ORACLE_TIMESTAMP_FORMAT = "dd-MMM-YY hh.mm.ss.SSS a XXX";
+	// private static final String ORACLE_TIMESTAMP_FORMAT =
+	// "dd-MMM-YY hh.mm.ss.SSS a XXX";
 
 	private final String sqlForGettingSourcePatternLayout = "select source_type, pattern_layout from source_metadata where source = ?";
 

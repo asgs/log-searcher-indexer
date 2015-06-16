@@ -12,6 +12,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +50,8 @@ public class Jdk7FileWatcher implements FileWatcher {
 
 	private Map<String, Long> filePositionMap;
 
+	private Set<String> directorySet;
+
 	private boolean threadShouldRun;
 
 	@Autowired
@@ -59,6 +62,7 @@ public class Jdk7FileWatcher implements FileWatcher {
 		try {
 			watchService = FileSystems.getDefault().newWatchService();
 			filePositionMap = new ConcurrentHashMap<String, Long>();
+			directorySet = new LinkedHashSet<String>();
 			logger.info("WatchService initialized with watchService {}.",
 					watchService);
 			Thread thread = new Thread(new Runnable() {
@@ -93,7 +97,15 @@ public class Jdk7FileWatcher implements FileWatcher {
 	private void registerFileForWatching(final String fileName) {
 		logger.info("Going to register file {}.", fileName);
 		int lastIndexOfSlash = fileName.lastIndexOf("/");
+		if (lastIndexOfSlash == -1) {
+			lastIndexOfSlash = fileName.lastIndexOf("\\");
+		}
 		String directoryName = fileName.substring(0, lastIndexOfSlash);
+		if (directorySet.contains(directoryName)) {
+			logger.info("Already registered {} for a different source.",
+					directoryName);
+			return;
+		}
 		Path directory = Paths.get(directoryName);
 		try {
 			if (logger.isDebugEnabled()) {
@@ -106,6 +118,7 @@ public class Jdk7FileWatcher implements FileWatcher {
 					StandardWatchEventKinds.ENTRY_DELETE },
 					SensitivityWatchEventModifier.HIGH);
 			filePositionMap.put(fileName, 0L);
+			directorySet.add(directoryName);
 			logger.info(
 					"Successfully registered directory {} to the WatchService.",
 					directory);

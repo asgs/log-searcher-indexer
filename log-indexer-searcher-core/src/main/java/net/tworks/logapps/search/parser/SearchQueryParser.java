@@ -63,7 +63,7 @@ public class SearchQueryParser {
 	}
 
 	/**
-	 * The method to infer the search query and make it search-able.
+	 * The method to parse/infer the search query and make it search-able.
 	 * 
 	 * @return A SearchQuery instance.
 	 */
@@ -76,11 +76,9 @@ public class SearchQueryParser {
 		searchQuery.setLogLevel(parseLogLevel(keyValues));
 		searchQuery.setMainQuery(getUnmatchedString());
 		searchQuery.setKeyValues(keyValueList);
-		// TODO - uncomment to enable time-based search.
-		/*
-		 * searchQuery.setTimeDuration(timeDuration);
-		 * searchQuery.setTimeUnit(timeUnit);
-		 */
+		searchQuery.setTimeDuration(timeDuration);
+		searchQuery.setTimeUnit(timeUnit);
+
 		logger.info("SearchQuery parsed and populated.");
 		return searchQuery;
 	}
@@ -130,7 +128,7 @@ public class SearchQueryParser {
 			map.put(matcher.group(1), matcher.group(2));
 		}
 		if (!map.isEmpty()) {
-			logger.info("Key value pairs parsed from the query below.");
+			logger.info("Key value pairs parsed from the query.");
 		}
 		return map;
 	}

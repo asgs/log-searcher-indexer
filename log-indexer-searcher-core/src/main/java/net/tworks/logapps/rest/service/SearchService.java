@@ -55,9 +55,14 @@ public class SearchService {
 		}
 		SearchQueryParser parser = new SearchQueryParser(query, time, timeUnit);
 		SearchQuery searchQuery = parser.parse();
-		String[] searchResults = querySearchFacade
-				.retrieveSearchResults(searchQuery);
-		logger.info("Ran query. Printing results.");
+		String[] searchResults = null;
+		try {
+			searchResults = querySearchFacade
+					.retrieveSearchResults(searchQuery);
+			logger.info("Ran query. Printing results.");
+		} catch (Exception e) {
+			logger.error("Error retrieving search results. Cause is {}.", e);
+		}
 		return searchResults;
 
 	}
