@@ -14,16 +14,34 @@ import java.util.List;
  */
 public class SourceTypeConfiguration {
 
+	/**
+	 * The search index of the source.
+	 */
 	private String sourceIndex;
 
+	/**
+	 * The type of the source.
+	 */
 	private String sourceType;
 
+	/**
+	 * The source - indicating the full path in the file system.
+	 */
 	private String source;
 
+	/**
+	 * THe pattern layout of the source (or log file).
+	 */
 	private String logPatternlayout;
 
+	/**
+	 * Key-values deciphered from the layout.
+	 */
 	private List<String> tokens;
-	
+
+	/**
+	 * The format of the Timestamp the log content will have.
+	 */
 	private String timeStampFormat;
 
 	/**
@@ -54,12 +72,14 @@ public class SourceTypeConfiguration {
 	 * @param sourceType
 	 * @param source
 	 * @param logPatternlayout
+	 * @param sourceIndex
 	 */
 	public SourceTypeConfiguration(String sourceType, String source,
-			String logPatternlayout) {
+			String logPatternlayout, String sourceIndex) {
 		this.sourceType = sourceType;
 		this.source = source;
 		this.logPatternlayout = logPatternlayout;
+		this.sourceIndex = sourceIndex;
 	}
 
 	/**
@@ -130,7 +150,8 @@ public class SourceTypeConfiguration {
 	}
 
 	/**
-	 * @param timeStampFormat the timeStampFormat to set
+	 * @param timeStampFormat
+	 *            the timeStampFormat to set
 	 */
 	public void setTimeStampFormat(String timeStampFormat) {
 		this.timeStampFormat = timeStampFormat;

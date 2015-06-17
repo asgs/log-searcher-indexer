@@ -6,7 +6,7 @@
 	<display-name>Log Searcher and Indexer Application</display-name>
 
 	<welcome-file-list>
-		<welcome-file />
+		<welcome-file>home.html</welcome-file>
 	</welcome-file-list>
 
 	<context-param>

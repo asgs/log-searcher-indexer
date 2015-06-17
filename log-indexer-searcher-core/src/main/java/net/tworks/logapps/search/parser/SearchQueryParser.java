@@ -192,21 +192,13 @@ public class SearchQueryParser {
 		}
 	}
 
-	public static void main(String[] args) {
-
-		SearchQueryParser searchQueryParser = new SearchQueryParser(
-				"index=blah_blah source_type=catalina_log thread_name=webcontainer-1 My search query goes here... log_level=debug guid=valuea userId=valueb ",
-				100, "MINUTES");
-		// System.out.println(searchQueryParser.fullQuery.split(" "));
-		/*
-		 * System.out.println(searchQueryParser.parseSearchIndex());
-		 * System.out.println(searchQueryParser.parseSourceType());
-		 * System.out.println(searchQueryParser.parseThreadName());
-		 * System.out.println(searchQueryParser.parseLogLevel());
-		 */
-		System.out.println(searchQueryParser.parseKeyValues());
-		System.out.println(searchQueryParser.getUnmatchedString());
-
-	}
+	/*
+	 * public static void main(String[] args) { SearchQueryParser
+	 * searchQueryParser = new SearchQueryParser(
+	 * "index=blah_blah source_type=catalina_log thread_name=webcontainer-1 My search query goes here... log_level=debug guid=valuea userId=valueb "
+	 * , 100, "MINUTES");
+	 * System.out.println(searchQueryParser.parseKeyValues());
+	 * System.out.println(searchQueryParser.getUnmatchedString()); }
+	 */
 
 }

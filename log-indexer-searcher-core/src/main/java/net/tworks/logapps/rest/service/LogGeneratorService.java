@@ -37,6 +37,17 @@ public class LogGeneratorService {
 	@Autowired
 	private DataSourceManager dataSourceManager;
 
+	/**
+	 * This method is not implemented yet. May not be required anymore, as this
+	 * was originally intended to help generate log content to simulate
+	 * real-time searches. This can now be conveniently done by hitting URLs at
+	 * random which the Tomcat or any other Web Container records in its access
+	 * logs.
+	 * 
+	 * @param sourceType
+	 * @param source
+	 * @return results
+	 */
 	@RequestMapping(value = "/generate", method = RequestMethod.GET)
 	public boolean generateLogContent(
 			@RequestParam(value = "sourceType") String sourceType,

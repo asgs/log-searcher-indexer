@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @author asgs
  * 
+ *         The Front controller to receive the search inputs from user and pass
+ *         it down to the Facade to generate the results.
+ * 
  */
 @RestController
 @RequestMapping("/search")

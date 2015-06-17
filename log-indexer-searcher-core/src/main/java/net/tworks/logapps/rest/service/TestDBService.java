@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @author asgs
  * 
+ * A test service. This is now defunct.
+ * 
  */
 @RestController
 @RequestMapping("/test")

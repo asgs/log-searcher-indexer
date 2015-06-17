@@ -16,6 +16,11 @@ import java.util.Map;
  *         to be Thread-Safe which means it won't hold any transaction or user
  *         data. All operations can be accessed by multiple threads
  *         concurrently.
+ * 
+ *         This class remains unused at the moment. But it serves as a layer to
+ *         integrate with Database access layer, regardless of the type of the
+ *         SQL/No-SQL databases used or the ORM frameworks used to simplify the
+ *         database operations.
  */
 public interface DBTableManager {
 

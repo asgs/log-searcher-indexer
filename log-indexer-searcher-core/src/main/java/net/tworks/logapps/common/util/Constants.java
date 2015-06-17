@@ -15,4 +15,9 @@ public interface Constants {
 	 */
 	String ORACLE_TIMESTAMP_FORMAT = "dd-MMM-YY hh.mm.ss.SSS a XXX";
 
+	/**
+	 * The line separator found in the files generated in Windows OSs.
+	 */
+	String WINDOWS_LINE_SEPARATOR = "\r\n";
+
 }

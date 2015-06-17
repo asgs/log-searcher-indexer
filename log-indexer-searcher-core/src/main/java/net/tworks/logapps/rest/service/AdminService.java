@@ -45,12 +45,7 @@ public class AdminService {
 			@RequestParam(value = "sourceIndex") String sourceIndex) {
 
 		SourceTypeConfiguration sourceTypeConfiguration = new SourceTypeConfiguration(
-				sourceType, source, logPatternLayout);
-		// SourceIndex is not mandatory. Which means this sourceType can be
-		// added to the (only) existing sourceIndex in the database repository.
-		if (sourceIndex != null) {
-			sourceTypeConfiguration.setSourceIndex(sourceIndex);
-		}
+				sourceType, source, logPatternLayout, sourceIndex);
 		LogPatternLayoutParser logPatternLayoutParser = new LogPatternLayoutParser(
 				logPatternLayout);
 
@@ -62,17 +57,18 @@ public class AdminService {
 		sourceTypeConfiguration.setTokens(tokens);
 		ConfigurationResult configurationResult = new ConfigurationResult();
 		try {
-			configureSourceTypeDAO
+			boolean result = configureSourceTypeDAO
 					.configureNewSourceType(sourceTypeConfiguration);
-			configurationResult.setResult(true);
+			configurationResult.setResult(result);
 			configurationResult
 					.setMessage("Successfully configured for indexing.");
 			logger.info("Successfully configured for indexing.");
 		} catch (DatabaseConfigurationException databaseConfigurationException) {
 			configurationResult.setResult(false);
-			configurationResult.setMessage("Failed! Reason is "
-					+ databaseConfigurationException.getMessage());
-			logger.error("Failed! Reason is {}.",
+			configurationResult
+					.setMessage("Exception configuring log file! Reason is "
+							+ databaseConfigurationException.getMessage());
+			logger.error("Exception configuring new log file! Reason is {}.",
 					databaseConfigurationException);
 		}
 		return configurationResult;

@@ -13,8 +13,14 @@ package net.tworks.logapps.common.model;
  */
 public class SearchKeyValue {
 
+	/**
+	 * A String denoting the key of the key-value pair.
+	 */
 	private final String key;
 
+	/**
+	 * A String denoting the value of the key-value pair.
+	 */
 	private final String value;
 
 	public SearchKeyValue(String key, String value) {

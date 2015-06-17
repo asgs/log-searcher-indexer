@@ -11,8 +11,14 @@ package net.tworks.logapps.rest.model;
  */
 public class ConfigurationResult {
 
+	/**
+	 * Whether the configuration was complete.
+	 */
 	private Boolean result;
 
+	/**
+	 * A message describing the result.
+	 */
 	private String message;
 
 	/**

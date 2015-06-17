@@ -3,8 +3,9 @@
  */
 package net.tworks.logapps.index.persist;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import static net.tworks.logapps.common.util.Constants.ORACLE_TIMESTAMP_FORMAT;
+import static net.tworks.logapps.common.util.Constants.WINDOWS_LINE_SEPARATOR;
+
 import java.sql.ResultSet;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,8 +23,6 @@ import net.tworks.logapps.admin.parser.LogPatternLayoutParser;
 import net.tworks.logapps.common.database.DataSourceManager;
 import net.tworks.logapps.common.model.SourceDTO;
 import net.tworks.logapps.index.metadata.StructuredEventMetaDataEnumerator;
-
-import static net.tworks.logapps.common.util.Constants.ORACLE_TIMESTAMP_FORMAT;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +52,6 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 
 	private JdbcTemplate jdbcTemplate;
 
-	// private static final String ORACLE_TIMESTAMP_FORMAT =
-	// "dd-MMM-YY hh.mm.ss.SSS a XXX";
-
 	private final String sqlForGettingSourcePatternLayout = "select source_type, pattern_layout from source_metadata where source = ?";
 
 	private final String sqlForInsertingRawEventData = "insert into raw_event (raw_event_data, event_timestamp, source_type) values(?, ?, ?)";
@@ -83,8 +79,7 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 					return strings;
 				});
 
-		// String sourcePatternLayout =
-		// "%X{IP} %X{field1} %X{field2} [%date{dd/MMM/yyyy:HH:mm:ssZ} guid=%{guid} userId=%{userId} %msg%n";
+		// 2. Insert the row(s) to raw_event table.
 		String sourceType = sourceMetadata[0];
 		String sourcePatternLayout = sourceMetadata[1];
 		logger.info("sourcePatternLayout is " + sourcePatternLayout);
@@ -96,7 +91,7 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 		String oracleTimeStampValue = null;
 		String timeStampFormat = logPatternLayoutParser.parseTimeStampFormat();
 		logger.info("TimeStampFormat is {}.", timeStampFormat);
-		String[] lines = logContents.split("\r\n");
+		String[] lines = logContents.split(WINDOWS_LINE_SEPARATOR);
 		for (String line : lines) {
 			// Skip stack traces for now.
 			if (StringUtils.isEmpty(line) || line.startsWith("\t")) {
@@ -105,7 +100,8 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 			}
 			// Escaping is required in Oracle.
 			line = line.replace("'", "''");
-			logger.info("Current log line is {}.", line);
+			// Commented because of too much log verbosity.
+			// logger.info("Current log line is {}.", line);
 			String[] tokens = line.split(" ");
 			if (indexOfTimeStampField != -1) {
 				String timeStampValue = "";
@@ -123,16 +119,13 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 						} else {
 							timeStampValue = timeStampValue
 									+ tokens[indexOfTimeStampField + counter];
-
 						}
-
 					}
-
 				} else {
 					timeStampValue = tokens[indexOfTimeStampField];
 				}
 				timeStampValue = timeStampValue.replaceAll("\\[", "");
-				// TODO - fix this hack.
+				// This hack
 				if (timeStampFormat.contains("z")
 						|| timeStampFormat.contains("Z")
 						|| timeStampFormat.contains("XXX")) {
@@ -151,8 +144,12 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 					logger.info("Final date in Oracle format is {}.",
 							oracleTimeStampValue);
 				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Error parsing the timestamp {}.", e);
+					SimpleDateFormat dateFormat2 = new SimpleDateFormat(
+							ORACLE_TIMESTAMP_FORMAT);
+					oracleTimeStampValue = dateFormat2.format(new Date());
+					logger.info("Default timeStamp created as {}.",
+							oracleTimeStampValue);
 				}
 			} else {
 				// Generate a timestamp as of current time.
@@ -163,10 +160,6 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 						oracleTimeStampValue);
 
 			}
-
-			// insert into raw_event (raw_event_data, event_timestamp,
-			// source_type) values('dfdf', TO_TIMESTAMP_TZ('13-Jun-15
-			// 02.23.04.000 AM +0530'), 'info_log')
 
 			if (!StringUtils.isEmpty(line)) {
 				try {
@@ -182,11 +175,11 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 							e);
 					return;
 				}
-
 				String logMessage = parseLogMessage(line, sourcePatternLayout);
 				List<String> metaData = structuredEventMetaDataEnumerator
 						.retrieveMetadata();
 				Map<String, String> tokenMap = parseTokens(metaData, line);
+				// 3. Insert the row(s) to the structured_event table.
 				StringBuilder builder = new StringBuilder(
 						sqlForInsertingStructuredEventData);
 				builder.append("(message_content,");
@@ -276,14 +269,6 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 			return null;
 		}
 
-		/*
-		 * String patternLayout =
-		 * "%date{dd-MMM-yyyy HH:mm:ss.SSS} %level [%thread] %logger %msg%n";
-		 * String logLine =
-		 * "14-Jun-2015 01:46:49.258 INFO [localhost-startStop-2] org.apache.catalina.core.ApplicationContext.log ContextListener: contextDestroyed()"
-		 * ;
-		 */
-
 		String[] tokens = patternLayout.split(" ");
 		int counter = 0;
 		for (String token : tokens) {
@@ -299,14 +284,14 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 		return threadName;
 	}
 
+	/**
+	 * Parses the actual log content of each log line.
+	 * 
+	 * @param logLine
+	 * @param patternLayout
+	 * @return Log message
+	 */
 	private String parseLogMessage(String logLine, String patternLayout) {
-		/*
-		 * String patternLayout =
-		 * "%X{IP} %X{field1} %X{field2} [%date{dd/MMM/yyyy:HH:mm:ss Z}] %msg%n"
-		 * ; String logLine =
-		 * "127.0.0.1 - - [13/Jun/2015:21:16:29 +0530] \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 146"
-		 * ;
-		 */
 		String[] tokens = patternLayout.split(" ");
 		int counter = 0;
 		for (String token : tokens) {
@@ -323,6 +308,13 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 		return logMessage;
 	}
 
+	/**
+	 * Strips the key-value pairs from each log line.
+	 * 
+	 * @param metaData
+	 * @param logLine
+	 * @return Map of key-value pairs.
+	 */
 	private Map<String, String> parseTokens(List<String> metaData,
 			String logLine) {
 		String[] tokens = new String[metaData.size()];
@@ -344,21 +336,21 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 		return tokenMap;
 	}
 
-	public static void main(String[] args) throws FileNotFoundException,
-			IOException {
-		/*
-		 * String readLines = IOUtils .toString( new FileInputStream(
-		 * "G:/dev/apache-tomcat-8.0.15-windows-x64/logs/localhost_access_log.2015-06-13.txt"
-		 * ), "UTF-8"); // new BasicLogDataPersister().persistLogData("blah2",
-		 * readLines); // new BasicLogDataPersister().parseLogMessage(); new
-		 * BasicLogDataPersister() .parseTokens( Arrays.asList("guid",
-		 * "userId"),
-		 * "127.0.0.1 - - [13/Jun/2015:21:16:29 +0530] guid=ssdsd-dsds userId=someName-blah \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 146"
-		 * );
-		 */
-
-		/* new BasicLogDataPersister().parseThreadName(); */
-	}
+	/*
+	 * public static void main(String[] args) throws FileNotFoundException,
+	 * IOException {
+	 * 
+	 * String readLines = IOUtils .toString( new FileInputStream(
+	 * "G:/dev/apache-tomcat-8.0.15-windows-x64/logs/localhost_access_log.2015-06-13.txt"
+	 * ), "UTF-8"); // new BasicLogDataPersister().persistLogData("blah2",
+	 * readLines); // new BasicLogDataPersister().parseLogMessage(); new
+	 * BasicLogDataPersister() .parseTokens( Arrays.asList("guid", "userId"),
+	 * "127.0.0.1 - - [13/Jun/2015:21:16:29 +0530] guid=ssdsd-dsds userId=someName-blah \"GET /log-indexer-searcher-webapp/log/retrieveAvailableLogs HTTP/1.1\" 200 146"
+	 * );
+	 * 
+	 * 
+	 * new BasicLogDataPersister().parseThreadName(); }
+	 */
 
 	@Override
 	public void update(Observable o, Object arg) {

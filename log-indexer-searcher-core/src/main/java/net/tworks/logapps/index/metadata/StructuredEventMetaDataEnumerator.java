@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  * 
  *         A Utility to query and maintain the custom columns that are/were
  *         created on the fly to improve the log search. These columns are
- *         completely optional, hence we query for those that are nullable.
+ *         completely optional, hence we query for those that are null-able.
  *
  */
 @Component

@@ -17,14 +17,29 @@ public class DatabaseConfigurationException extends Exception {
 	 */
 	private static final long serialVersionUID = 432338453858927807L;
 
+	/**
+	 * Default no-arg constructor.
+	 */
 	public DatabaseConfigurationException() {
 		super();
 	}
 
+	/**
+	 * Constructs an instance taking in the message passed in.
+	 * 
+	 * @param message
+	 *            Message to be embedded.
+	 */
 	public DatabaseConfigurationException(String message) {
 		super(message);
 	}
 
+	/**
+	 * Constructs an instance taking in the Throwable as the new cause.
+	 * 
+	 * @param throwable
+	 *            Throwable to be added as the cause.
+	 */
 	public DatabaseConfigurationException(Throwable throwable) {
 		super(throwable);
 	}

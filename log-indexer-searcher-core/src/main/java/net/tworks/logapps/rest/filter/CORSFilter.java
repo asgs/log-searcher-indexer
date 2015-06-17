@@ -19,6 +19,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author asgs
+ * 
+ *         Implemented in case the server has to cater to requests originating
+ *         from cross-domains. This is actually required when the front-end is
+ *         run off the file system directly without getting served by the
+ *         WebContainer.
  *
  */
 @WebFilter(urlPatterns = { "/*" })
@@ -42,7 +47,7 @@ public class CORSFilter implements Filter {
 	}
 
 	public void destroy() {
-		logger.info("Initialized {}.", getClass().getName());
+		logger.info("Destroyed {}.", getClass().getName());
 	}
 
 }

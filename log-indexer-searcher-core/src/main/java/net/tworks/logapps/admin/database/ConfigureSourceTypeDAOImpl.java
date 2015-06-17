@@ -38,12 +38,26 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 	@Autowired
 	private DataSourceManager dataSourceManager;
 
+	/**
+	 * This query will add a row to map the search index and the source type.
+	 */
 	private final String sqlForIndexMapping = "insert into index_mapping (search_index, source_type) values (?, ?)";
 
+	/**
+	 * This query will add a row to map the source type and the actual source
+	 * (or log file).
+	 */
 	private final String sqlForSourceMapping = "insert into source_mapping (source_type, source) values (?, ?)";
 
+	/**
+	 * This query adds a row to record all meta-data about a particular source.
+	 */
 	private final String sqlForSourceMetadata = "insert into source_metadata (source_type, source, pattern_layout, timestamp_format) values (?, ?, ?, ?)";
 
+	/**
+	 * This query will alter the structured_event to add new columns
+	 * corresponding to the key-values discovered from the log pattern layout.
+	 */
 	private StringBuilder sqlForAlterTableStructuredEvent = new StringBuilder(
 			"alter table structured_event");
 
@@ -96,13 +110,13 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 			}
 
 			try {
-				// TODO Check if the column already exists.
+				// We can also check if the column already exists.
 				// SELECT column_name FROM USER_TAB_COLUMNS WHERE table_name =
 				// 'structured_event'
 				jdbcTemplate
 						.execute(sqlForAlterTableStructuredEvent.toString());
 			} catch (DataAccessException dataAccessException) {
-				logger.error(
+				logger.warn(
 						"Error altering table structured_event; cause is {}",
 						dataAccessException);
 			}
@@ -114,6 +128,15 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 		return true;
 	}
 
+	/**
+	 * This method adds a row to map the search index and the source type.
+	 * 
+	 * @param jdbcTemplate
+	 *            Spring's instance to do database transactions.
+	 * @param sourceTypeConfiguration
+	 *            The model object representing the source.
+	 * @return whether the operation was successful.
+	 */
 	@Transactional
 	public boolean configureIndexMapping(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
@@ -138,6 +161,16 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 
 	}
 
+	/**
+	 * This method adds a row to map the source type and the actual source (or
+	 * log file).
+	 * 
+	 * @param jdbcTemplate
+	 *            Spring's instance to do database transactions.
+	 * @param sourceTypeConfiguration
+	 *            The model object representing the source.
+	 * @return whether the operation was successful.
+	 */
 	@Transactional
 	public boolean configureSourceMapping(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {
@@ -161,6 +194,15 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 		});
 	}
 
+	/**
+	 * This method adds a row to record all meta-data about a particular source.
+	 * 
+	 * @param jdbcTemplate
+	 *            Spring's instance to do database transactions.
+	 * @param sourceTypeConfiguration
+	 *            The model object representing the source.
+	 * @return whether the operation was successful.
+	 */
 	@Transactional
 	public boolean configureSourceMetadata(JdbcTemplate jdbcTemplate,
 			final SourceTypeConfiguration sourceTypeConfiguration) {

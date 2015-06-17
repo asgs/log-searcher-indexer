@@ -7,10 +7,13 @@ import java.util.Collection;
 
 /**
  * @author asgs
+ * 
+ *         A collection of {@link SourceType} representing all the source types
+ *         configured in the system..
  *
  */
 public class SourceTypes {
-	
+
 	private Collection<SourceType> sourceTypes;
 
 	/**
@@ -21,7 +24,8 @@ public class SourceTypes {
 	}
 
 	/**
-	 * @param sourceTypes the sourceTypes to set
+	 * @param sourceTypes
+	 *            the sourceTypes to set
 	 */
 	public void setSourceTypes(Collection<SourceType> sourceTypes) {
 		this.sourceTypes = sourceTypes;

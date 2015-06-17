@@ -28,6 +28,7 @@ public class QuerySearchFacade {
 
 	public String[] retrieveSearchResults(SearchQuery searchQuery) {
 
+		// Time search not needed.
 		if (searchQuery.getTimeDuration() == 0) {
 			if (searchQuery.getKeyValues().isEmpty()) {
 				// No key value pairs available.

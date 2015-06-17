@@ -48,7 +48,7 @@ public class LogPatternLayoutParser {
 	 * Generates a list of key names which follow the standard = separated
 	 * key-value format.
 	 * 
-	 * @return
+	 * @return List of key names.
 	 */
 	public List<String> generateKeyValueTokenNames() {
 		List<String> tokenNameList = new ArrayList<String>();
@@ -68,14 +68,12 @@ public class LogPatternLayoutParser {
 	}
 
 	/**
-	 * Retrieves the time stamp format specified by the pattern layout.
+	 * Retrieves the Timestamp format specified by the pattern layout.
 	 * 
-	 * @return
+	 * @return The format of the Timestamp.
 	 */
 	public String parseTimeStampFormat() {
 		String timeStampFormat = null;
-		// String logPatternLayout =
-		// "%-30(%d{HH:mm:ss.SSS} [%thread]) %-5level %logger{32} - %msg%n";
 		Matcher matcher = TIMESTAMP_REGEX_PATTERN.matcher(logPatternLayout);
 		while (matcher.find()) {
 			timeStampFormat = matcher.group(1);
@@ -84,14 +82,22 @@ public class LogPatternLayoutParser {
 		return timeStampFormat;
 	}
 
+	/**
+	 * Pattern matches the source to check if there's a Timestamp present.
+	 * 
+	 * @return whether Timestamp is present.
+	 */
 	public boolean hasTimeStampField() {
 		Matcher matcher = TIMESTAMP_REGEX_PATTERN.matcher(logPatternLayout);
-		/*System.out.println(matcher.group(1));
-		System.out.println(matcher.start());
-		System.out.println(matcher.end());*/
 		return matcher.matches();
 	}
 
+	/**
+	 * Parses the each log line to find the position of the Timestamp field, if
+	 * any.
+	 * 
+	 * @return position of the Timestamp field.
+	 */
 	public int findPositionOfTimeStampField() {
 		int index = 0;
 		if (hasTimeStampField()) {
@@ -103,21 +109,21 @@ public class LogPatternLayoutParser {
 				}
 				index++;
 			}
-
 			return index;
 		} else {
 			return --index;
 		}
 	}
 
-	public static void main(String[] args) {
-		// System.out.println(parseLogLevel());
-		LogPatternLayoutParser logPatternLayoutParser = new LogPatternLayoutParser(
-				"%X{IP} %X{field1} %X{field2} [%date{dd/MMM/yyyy:HH:mm:ss Z}] %msg%n");
-		System.out.println(logPatternLayoutParser.hasTimeStampField());
-		System.out.println(logPatternLayoutParser.parseTimeStampFormat());
-		System.out.println(logPatternLayoutParser
-				.findPositionOfTimeStampField());
-	}
+	/*
+	 * public static void main(String[] args) { //
+	 * System.out.println(parseLogLevel()); LogPatternLayoutParser
+	 * logPatternLayoutParser = new LogPatternLayoutParser(
+	 * "%X{IP} %X{field1} %X{field2} [%date{dd/MMM/yyyy:HH:mm:ss Z}] %msg%n");
+	 * System.out.println(logPatternLayoutParser.hasTimeStampField());
+	 * System.out.println(logPatternLayoutParser.parseTimeStampFormat());
+	 * System.out.println(logPatternLayoutParser
+	 * .findPositionOfTimeStampField()); }
+	 */
 
 }

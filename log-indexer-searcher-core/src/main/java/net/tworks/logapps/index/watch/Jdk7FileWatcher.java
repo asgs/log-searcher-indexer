@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
@@ -65,17 +67,16 @@ public class Jdk7FileWatcher implements FileWatcher {
 			directorySet = new LinkedHashSet<String>();
 			logger.info("WatchService initialized with watchService {}.",
 					watchService);
-			Thread thread = new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					pollFileChanges();
-				}
+			ExecutorService executorService = Executors
+					.newSingleThreadExecutor();
+			executorService.execute(() -> {
+				Thread.currentThread().setName(
+						"FileWatcherDaemonThread-"
+								+ atomicInteger.incrementAndGet());
+				pollFileChanges();
 			});
 			threadShouldRun = true;
-			thread.setName("FileWatcherDaemonThread-"
-					+ atomicInteger.incrementAndGet());
-			thread.start();
+			executorService.shutdown();
 			logger.info("WatchService background daemon spawned off.");
 			// registerObserver(logDataPersister);
 		} catch (IOException e) {
@@ -86,14 +87,23 @@ public class Jdk7FileWatcher implements FileWatcher {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
-		Jdk7FileWatcher fileWatcherTest = new Jdk7FileWatcher();
-		fileWatcherTest.initialize();
-		fileWatcherTest
-				.watchOutForChanges("D:/DLs/apache-tomcat-8.0.15-windows-x64/logs/localhost_access_log.2015-06-12.txt");
+	/*
+	 * public static void main(String[] args) { Jdk7FileWatcher fileWatcherTest
+	 * = new Jdk7FileWatcher(); fileWatcherTest.initialize(); fileWatcherTest
+	 * .watchOutForChanges(
+	 * "D:/DLs/apache-tomcat-8.0.15-windows-x64/logs/localhost_access_log.2015-06-12.txt"
+	 * );
+	 * 
+	 * }
+	 */
 
-	}
-
+	/**
+	 * Extracts the directory name where this file is present and registers it
+	 * for file watching.
+	 * 
+	 * @param fileName
+	 *            File name who directory to be registere.
+	 */
 	private void registerFileForWatching(final String fileName) {
 		logger.info("Going to register file {}.", fileName);
 		int lastIndexOfSlash = fileName.lastIndexOf("/");
@@ -128,6 +138,10 @@ public class Jdk7FileWatcher implements FileWatcher {
 		}
 	}
 
+	/**
+	 * This is a daemon thread polling for file changes notified by the
+	 * <code>WatchService</code> API.
+	 */
 	private void pollFileChanges() {
 		while (threadShouldRun) {
 			WatchKey watchKey = null;
@@ -177,6 +191,12 @@ public class Jdk7FileWatcher implements FileWatcher {
 		}
 	}
 
+	/**
+	 * Reads a given file fully and persists the contents to the DB.
+	 * 
+	 * @param fileName
+	 *            The fully qualified name of the file.
+	 */
 	private void readFile(String fileName) {
 		try (FileInputStream fileInputStream = new FileInputStream(fileName)) {
 			byte[] byteArray = IOUtils.toByteArray(fileInputStream);
@@ -195,6 +215,12 @@ public class Jdk7FileWatcher implements FileWatcher {
 		}
 	}
 
+	/**
+	 * Reads file changes from this file and persists the contents to the DB.
+	 * 
+	 * @param fileName
+	 *            The fully qualified name of the file.
+	 */
 	private void readNewContent(String fileName) {
 		try (FileInputStream fileInputStream = new FileInputStream(fileName)) {
 			long byteLocation = filePositionMap.get(fileName);
@@ -224,7 +250,13 @@ public class Jdk7FileWatcher implements FileWatcher {
 	@Override
 	public void watchOutForChanges(String fullyQualifiedFileName) {
 		registerFileForWatching(fullyQualifiedFileName);
-		readFile(fullyQualifiedFileName);
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		logger.info("Reading full file asyncly.");
+		executorService.execute(() -> {
+			readFile(fullyQualifiedFileName);
+		});
+		executorService.shutdown();
+
 	}
 
 	/*

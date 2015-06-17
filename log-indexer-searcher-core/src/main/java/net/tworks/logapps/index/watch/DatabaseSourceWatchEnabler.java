@@ -49,17 +49,12 @@ public class DatabaseSourceWatchEnabler {
 			return;
 		}
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
-		Runnable runnable = new Runnable() {
-
-			@Override
-			public void run() {
-				for (String source : sources) {
-					fileWatcher.watchOutForChanges(source);
-				}
-
+		executorService.execute(() -> {
+			Thread.currentThread().setName("DatabaseSourceWatchEnabler");
+			for (String source : sources) {
+				fileWatcher.watchOutForChanges(source);
 			}
-		};
-		executorService.execute(runnable);
+		});
 		logger.info("Successfully configured watch for the sources {}.",
 				sources);
 		executorService.shutdown();
