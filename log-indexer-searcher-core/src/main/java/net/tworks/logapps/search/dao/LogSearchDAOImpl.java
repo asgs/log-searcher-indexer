@@ -97,12 +97,8 @@ public class LogSearchDAOImpl implements LogSearchDAO {
 	 * @return True/False
 	 */
 	private boolean contains(List<SearchKeyValue> keyValues, String key) {
-		for (SearchKeyValue keyValue : keyValues) {
-			if (keyValue.getKey().equalsIgnoreCase(key)) {
-				return true;
-			}
-		}
-		return false;
+		return keyValues.stream().anyMatch(
+				keyValue -> keyValue.getKey().equalsIgnoreCase(key));
 	}
 
 	@Override

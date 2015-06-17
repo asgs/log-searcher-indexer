@@ -103,12 +103,11 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 
 		List<String> tokens = sourceTypeConfiguration.getTokens();
 		if (!tokens.isEmpty()) {
-			for (String token : tokens) {
+			tokens.stream().forEach(token -> {
 				sqlForAlterTableStructuredEvent.append(" add ");
 				sqlForAlterTableStructuredEvent.append(token);
 				sqlForAlterTableStructuredEvent.append(" varchar2(100)");
-			}
-
+			});
 			try {
 				// We can also check if the column already exists.
 				// SELECT column_name FROM USER_TAB_COLUMNS WHERE table_name =

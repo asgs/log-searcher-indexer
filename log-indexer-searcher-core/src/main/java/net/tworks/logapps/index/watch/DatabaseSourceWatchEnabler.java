@@ -51,9 +51,9 @@ public class DatabaseSourceWatchEnabler {
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
 		executorService.execute(() -> {
 			Thread.currentThread().setName("DatabaseSourceWatchEnabler");
-			for (String source : sources) {
+			sources.stream().forEach((String source) -> {
 				fileWatcher.watchOutForChanges(source);
-			}
+			});
 		});
 		logger.info("Successfully configured watch for the sources {}.",
 				sources);

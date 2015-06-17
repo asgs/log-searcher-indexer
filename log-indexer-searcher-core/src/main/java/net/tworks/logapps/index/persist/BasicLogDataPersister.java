@@ -203,12 +203,12 @@ public class BasicLogDataPersister implements LogDataPersister, Observer {
 				}
 
 				if (!tokenMap.isEmpty()) {
-					for (Entry<String, String> entry : tokenMap.entrySet()) {
-						builder.append(entry.getKey());
+					tokenMap.forEach((String key, String value) -> {
+						builder.append(key);
 						builder.append(",");
-						valueBuilder.append(entry.getValue());
+						valueBuilder.append(value);
 						valueBuilder.append("',");
-					}
+					});					
 				} else {
 					logger.info("tokenMap is empty.");
 				}

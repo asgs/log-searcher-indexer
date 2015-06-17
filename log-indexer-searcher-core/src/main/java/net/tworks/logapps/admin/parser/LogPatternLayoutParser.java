@@ -4,6 +4,7 @@
 package net.tworks.logapps.admin.parser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,7 +54,8 @@ public class LogPatternLayoutParser {
 	public List<String> generateKeyValueTokenNames() {
 		List<String> tokenNameList = new ArrayList<String>();
 		String[] splits = logPatternLayout.split(" ");
-		for (String string : splits) {
+		List<String> list = Arrays.asList(splits);
+		list.stream().forEach(string -> {
 			String[] tokens = string.split("=");
 			if (tokens.length == 2) {
 				tokenNameList.add(tokens[0]);
@@ -61,7 +63,7 @@ public class LogPatternLayoutParser {
 					logger.debug("Found a = separated key {}.", tokens[0]);
 				}
 			}
-		}
+		});
 		logger.info("Constructed a token list of size {} for the layout {}",
 				tokenNameList.size(), logPatternLayout);
 		return tokenNameList;

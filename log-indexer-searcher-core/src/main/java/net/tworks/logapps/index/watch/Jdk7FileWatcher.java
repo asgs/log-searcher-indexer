@@ -12,6 +12,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -233,9 +234,12 @@ public class Jdk7FileWatcher implements FileWatcher {
 				// The separator should be configurable based on the Platform.
 				String[] lines = fileContents.split("\r\n");
 				logger.info("New content below.");
-				for (String line : lines) {
-					logger.debug(line);
-				}
+				List<String> lineList = Arrays.asList(lines);
+				lineList.stream().forEach(line -> {
+					if (logger.isDebugEnabled()) {
+						logger.debug(line);
+					}
+				});
 			}
 			// setChanged();
 			// SourceDTO sourceDTO = new SourceDTO(fileName, fileContents);
