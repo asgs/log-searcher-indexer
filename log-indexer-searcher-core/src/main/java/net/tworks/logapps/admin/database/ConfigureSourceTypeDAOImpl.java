@@ -122,7 +122,7 @@ public class ConfigureSourceTypeDAOImpl implements ConfigureSourceTypeDAO {
 
 		}
 
-		fileWatcher.watchOutForChanges(sourceTypeConfiguration.getSource());
+		fileWatcher.watchOutForChanges(sourceTypeConfiguration.getSource(), true);
 
 		return true;
 	}

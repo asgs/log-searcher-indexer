@@ -52,7 +52,7 @@ public class DatabaseSourceWatchEnabler {
 		executorService.execute(() -> {
 			Thread.currentThread().setName("DatabaseSourceWatchEnabler");
 			sources.stream().forEach((String source) -> {
-				fileWatcher.watchOutForChanges(source);
+				fileWatcher.watchOutForChanges(source, false);
 			});
 		});
 		logger.info("Successfully configured watch for the sources {}.",

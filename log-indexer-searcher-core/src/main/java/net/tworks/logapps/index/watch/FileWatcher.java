@@ -25,9 +25,13 @@ public interface FileWatcher {
 	 * Interface method to be implemented to watch out for any changes in the
 	 * given file.
 	 * 
-	 * @param file
+	 * @param fullyQualifiedFileName
+	 *            The source's full file name.
+	 * @param firstTime
+	 *            boolean whether the source is new or configured in Database
+	 *            already.
 	 */
-	void watchOutForChanges(String fullyQualifiedFileName);
+	void watchOutForChanges(String fullyQualifiedFileName, boolean firstTime);
 
 	/**
 	 * Adds a convenience for the callers to subscribe to events that may be

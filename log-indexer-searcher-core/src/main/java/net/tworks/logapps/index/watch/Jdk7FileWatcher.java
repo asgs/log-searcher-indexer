@@ -252,15 +252,16 @@ public class Jdk7FileWatcher implements FileWatcher {
 	}
 
 	@Override
-	public void watchOutForChanges(String fullyQualifiedFileName) {
+	public void watchOutForChanges(String fullyQualifiedFileName, boolean firstTime) {
 		registerFileForWatching(fullyQualifiedFileName);
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
-		logger.info("Reading full file asyncly.");
-		executorService.execute(() -> {
-			readFile(fullyQualifiedFileName);
-		});
-		executorService.shutdown();
-
+		if (firstTime) {
+			ExecutorService executorService = Executors.newSingleThreadExecutor();
+			logger.info("Reading full file asyncly.");
+			executorService.execute(() -> {
+				readFile(fullyQualifiedFileName);
+			});
+			executorService.shutdown();	
+		}
 	}
 
 	/*
