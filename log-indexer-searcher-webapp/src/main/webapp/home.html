@@ -1,33 +1,33 @@
 <html>
 <head>
+<script type="text/javascript" src="scripts/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="scripts/home-script.js"></script>
+<link href="styles/home-styles.css" rel="stylesheet" type="text/css" title="Styles for home page."/>
 <title>Log Searcher Indexer Application</title>
 </head>
 <body>
 	<h2 style="text-align: center">Welcome to Log Searcher Indexer
 		Application!</h2>
-	<br />
-	<br />
-	<br />
 	<hr />
 	<br />
 	<br />
 	<br />
-	<div id="container">
-		<div id="searchPanel" style="float: left; border: 1px dotted blue"
-			width="240px">
-			<h3 style="text-align: center">
+	<br />
+	<br />
+	<div id="container" class="containerStyle">
+		<div id="searchPanel" class="searchPanel">
+			<h3>
 				<a href="search.html">Search</a>
 			</h3>
-			<p>This module will allow you to search log files indexed
+			<p class="modulePadding">This module allows you to search log files indexed
 				previously.</p>
-
 		</div>
-		<div id="adminPanel" style="float: right; border: 1px dotted blue"
-			width="240px">
-			<a href="admin.html"><h3 style="text-align: center">Administration</h3></a>
-			<p>This module will allow you to configure new log files for
+		<div id="adminPanel" class="adminPanel">
+			<h3>
+				<a href="admin.html">Administration</a>
+			</h3>
+			<p class="modulePadding">This module allows you to configure new log files for
 				indexing. These log files will be available for searching later.</p>
-
 		</div>
 	</div>
 </body>

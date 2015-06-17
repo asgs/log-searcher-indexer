@@ -3,46 +3,49 @@
 <head>
 <script type="text/javascript" src="scripts/jquery-2.1.4.min.js"></script>
 <script type="text/javascript" src="scripts/admin-script.js"></script>
+<link href="styles/admin-styles.css" rel="stylesheet" type="text/css" title="Styles for Admin page.">
 <title>LogSearcher Indexer Application</title>
 </head>
 <body>
-	<nav>
-		<ul style="list-style: none;">
+	<nav id="mainNav" class="textCenter">
+		<ul>
 			<li><a href="home.html">Home</a></li>
 			<li><a href="search.html">Search</a></li>
 		</ul>
 	</nav>
 	<hr />
-	<h2 style="text-align: center">Administration</h2>
+	<h2 class="textCenter greyColor myBoldFont">Administration</h2>
 	<br />
 	<br />
 	<br />
 
-	<div id="container">
+	<div id="container" class="containerStyle">
 		<div id="controls">
-			<div style="padding: 4px">
-				<label for="source">Log File </label><input type="text" id="source"
+			<div class="controlPadding">
+				<label for="source">Log File Path </label><input type="text" id="source"
 					maxlength="200" placeholder="Full path of the file goes here..."
 					size="100" />
 			</div>
-			<div style="padding: 4px">
+			<div class="controlPadding">
 				<label for="logPatternlayout">Log File Pattern Layout </label><input
 					type="text" id="logPatternlayout" maxlength="200"
 					placeholder="Log pattern layout" size="100" />
 			</div>
-			<div style="padding: 4px">
+			<div class="controlPadding">
 				<label for="sourceType">Log File type </label><input type="text"
 					id="sourceType" placeholder="the source_type field in database"
-					size="20" />
+					size="100" />
 			</div>
-			<div style="padding: 4px">
+			<div class="controlPadding">
 				<label for="sourceIndex">Log File index </label><input type="text"
 					id="sourceIndex" placeholder="the search_index field in database"
-					size="20" />
+					size="100" />
 			</div>
-			<input id="adminButton" type="button" value="Configure"></input>
-		</div>
-		<div id="configResults"></div>
+			<div id="buttonDiv" class="textCenter">
+				<input id="adminButton" type="button" value="Configure" class="submitButtonStyle"></input>
+			</div>
+		</div>		
 	</div>
+	<div id="configResults"></div>
 </body>
 </html>

@@ -2,7 +2,13 @@
  * 
  */
 
-var base_url = "http://localhost:8080/log-indexer-searcher-webapp/"; 
+var base_url = "http://localhost:8080/log-indexer-searcher-webapp/";
+
+$(document).ready(
+	function() {
+		$("#mainNav").attr("style","width:" + (window.innerWidth * 1 / 7) + "px");
+	}
+);
 
 $(document)
 		.ready(
@@ -38,7 +44,8 @@ $(document)
 											} else {
 												$("#searchResults").append("<p style=\"color:red\">No results found.</p>");
 											}
-										}).fail(function(jqXHR, textStatus){
+										}).fail(function(jqXHR, textStatus){									
+											$("#searchResults").html("");
 											alert("failed to get data because " + textStatus);
 										});
 

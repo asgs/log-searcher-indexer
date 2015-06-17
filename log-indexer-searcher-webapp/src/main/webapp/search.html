@@ -3,24 +3,25 @@
 <head>
 <script type="text/javascript" src="scripts/jquery-2.1.4.min.js"></script>
 <script type="text/javascript" src="scripts/search-script.js"></script>
+<link href="styles/search-styles.css" rel="stylesheet" type="text/css" title="Styles for search page."/>
 <title>LogSearcher Indexer Application</title>
 </head>
 <body>
-	<nav>
-		<ul style="list-style: none;">
+	<nav id="mainNav">
+		<ul>
 			<li><a href="home.html">Home</a></li>
 			<li><a href="admin.html">Administration</a></li>
 		</ul>
 	</nav>
 	<hr />
-	<h2 style="text-align: center">Search</h2>
+	<h2 class="textCenter greyColor">Search</h2>
 	<br />
 	<br />
 	<br />
 
 	<div id="container">
 		<div id="controls">
-			<textarea rows="3" cols="100" id="searchQuery"
+			<textarea rows="1" cols="100" id="searchQuery"
 				placeholder="Enter your search query here..."></textarea>
 			<select id="timeFrame" title="Time duration">
 				<option value="">Select Duration</option>
@@ -32,7 +33,8 @@
 				<option value="24 HOURS">24 HOURS</option>
 				<option value="2 DAYS">2 DAYS</option>
 				<option value="7 DAYS">7 DAYS</option>
-			</select> <input id="searchButton" type="button" value="Search"></input>
+			</select>
+			<input id="searchButton" type="button" value="Search"></input>
 		</div>
 		<div id="searchResults"></div>
 	</div>

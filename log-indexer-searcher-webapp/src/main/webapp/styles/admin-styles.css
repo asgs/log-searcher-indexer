@@ -1,0 +1,74 @@
+.textCenter {
+	text-align: center;
+}
+
+#mainNav{
+    background-color: #8AD9FF;
+    border-radius: 5px;
+}
+
+.controlPadding {
+	padding: 10px;
+}
+
+.containerStyle {
+	margin:0px auto;
+	border:1px dotted;
+	text-align:right;
+	border-color:grey;
+}
+
+input[type='text'] {
+	color:grey;
+	border:1px solid;
+}
+
+.greyColor {
+	color:grey;
+}
+
+.myBoldFont {
+	font-weight: italic;
+}
+
+ul {
+	 padding: 8px;
+}
+li {
+	display: inline;
+}
+
+li a {
+	text-decoration: none;
+    padding: 8px 8px 8px 8px;
+}
+
+a:link, a:visited {
+	text-decoration:underline;
+	color:black;
+}
+
+a:hover {
+	text-decoration: none;
+	font-weight: bold;
+	color: blue;
+}
+
+.submitButtonStyle {
+	border: none;
+	width: 200px;
+	height: 30px;
+	margin-bottom: 5px;
+	background-color: green;
+	color: yellow;
+}
+
+.progressText {
+	color: green; 
+	text-align: center;
+}
+
+.failureText {
+	color: red;
+	text-align: center;
+}
