@@ -8,7 +8,7 @@ This application is basically a simple web application that has a very simple fr
 Features
 --------
 
-Ability to configure (or administer) log files. This is required so that the application can index the log files and parse it for searching later.
+Ability to configure (or administer) log files. This is required so that the application can parse and index the log files for searching later.
 
 Ability to search text content present in log files (which are configured previously).
 
