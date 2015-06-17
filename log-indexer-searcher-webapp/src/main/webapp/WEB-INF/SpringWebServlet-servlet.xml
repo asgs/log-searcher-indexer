@@ -20,11 +20,11 @@
 		transaction-manager="transactionManager" /> -->
 	<context:component-scan base-package="net.tworks.logapps.*" />
 
-	<!-- <bean id="searchDBDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+	<bean id="searchDBDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		<property name="jndiName" value="java:/comp/env/jdbc/searchdb" />
 	</bean>
 
-	Creating TransactionManager Bean, since JDBC we are creating of type 
+	<!-- Creating TransactionManager Bean, since JDBC we are creating of type 
 		DataSourceTransactionManager
 	<bean id="transactionManager"
 		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
